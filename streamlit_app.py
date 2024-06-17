@@ -112,10 +112,10 @@ if uploaded_file is not None:
     first_line = file_content.split('\n')[0]
     
     # Determine which function to call based on the header
-    if first_line == "\"Time differences (ps)\"\t\"Counts per bin\"":
+    if "Time differences" in first_line:
         st.write("Detected g2 data format. Plotting g2 function...")
         plot_g2(uploaded_file)
-    elif first_line == "\"Time (ps)\"\t\"Channel 1 - Count rate (counts/s)\"\t\"Channel 2 - Count rate (counts/s)\"":
+    elif "Count rate" in first_line:
         st.write("Detected count rate data format. Plotting count rate...")
         plot_count_rate(uploaded_file)
     else:
