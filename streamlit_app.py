@@ -8,27 +8,8 @@ import seaborn as sns
 import io
 
 # Define your existing functions
-def plot_count_rate(file):
-    data = pd.read_csv(file, delimiter='\t', header=0)
-    data["Time (s)"] = data["Time (ps)"] / 1e12
-
-    plt.figure(figsize=(10, 6))
-    plt.plot(data["Time (s)"], data["Channel 1 - Count rate (counts/s)"], label='Count rate channel 1')
-    plt.plot(data["Time (s)"], data["Channel 2 - Count rate (counts/s)"], label='Count rate channel 2')
-
-    plt.xlabel('Time (s)')
-    plt.ylabel('Count rate (counts/s)')
-    plt.title('Count Rate vs Time')
-    plt.legend()
-    plt.grid(True)
-    st.pyplot(plt)
-
-def hz_to_khz(y, pos):
-    return f'{y / 1000:.0f}'
-
-def plot_multiple_count_rates(files, start_times_ps, labels, plot_sum=False, title=None, poster_figure=False):
+def plot_count_rate(files, start_times_ps, labels, plot_sum=False, title=None, poster_figure=False):
     sns.set_palette("husl", len(files))
-
     plt.figure(figsize=(10, 6))
 
     for file, start_time_ps, label in zip(files, start_times_ps, labels):
@@ -62,6 +43,9 @@ def plot_multiple_count_rates(files, start_times_ps, labels, plot_sum=False, tit
         plt.tight_layout()
 
     st.pyplot(plt)
+
+def hz_to_khz(y, pos):
+    return f'{y / 1000:.0f}'
 
 def g2_function(x, p, q, y0, x0, a):
     return y0 + a * (1 - np.exp(-0.5 * p * np.abs(x-x0)) * (np.cos(0.5 * q * np.abs(x-x0)) + p/q * np.sin(0.5 * q * np.abs(x-x0))))
@@ -102,21 +86,29 @@ def plot_g2(file, moleculeTitle='', initial_guess=(0.4, 0.1, 500, 0, 1000), prin
 # Streamlit app code
 st.title("Data Plotting Application")
 
-uploaded_file = st.file_uploader("Choose a .txt file", type="txt", accept_multiple_files=False)
-if uploaded_file is not None:
-    st.write("File uploaded successfully!")
+uploaded_files = st.file_uploader("Choose .txt files", type="txt", accept_multiple_files=True)
+if uploaded_files:
+    st.write("Files uploaded successfully!")
+
+    # Read the first line of the first file to determine the header
+    first_file_content = uploaded_files[0].read().decode('utf-8')
+    uploaded_files[0].seek(0)  # Reset file pointer to the beginning
+    first_line = first_file_content.split('\n')[0]
     
-    # Read the first line of the file to determine the header
-    file_content = uploaded_file.read().decode('utf-8')
-    uploaded_file.seek(0)  # Reset file pointer to the beginning
-    first_line = file_content.split('\n')[0]
-    
-    # Determine which function to call based on the header
     if "Time differences" in first_line:
         st.write("Detected g2 data format. Plotting g2 function...")
-        plot_g2(uploaded_file)
+        for file in uploaded_files:
+            plot_g2(file)
     elif "Count rate" in first_line:
         st.write("Detected count rate data format. Plotting count rate...")
-        plot_count_rate(uploaded_file)
+
+        # Get additional parameters from the user
+        start_times_ps = [st.number_input(f"Start time (ps) for {file.name}", value=0) for file in uploaded_files]
+        labels = [st.text_input(f"Label for {file.name}", value=file.name) for file in uploaded_files]
+        plot_sum = st.radio("Plot sum of count rates?", ("No", "Yes")) == "Yes"
+        title = st.text_input("Plot title", value="Count Rate vs Time")
+        poster_figure = st.radio("Poster figure formatting?", ("No", "Yes")) == "Yes"
+
+        plot_count_rate(uploaded_files, start_times_ps, labels, plot_sum, title, poster_figure)
     else:
         st.write("Unrecognized file format.")
