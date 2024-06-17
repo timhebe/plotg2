@@ -105,5 +105,18 @@ st.title("Data Plotting Application")
 uploaded_file = st.file_uploader("Choose a .txt file", type="txt", accept_multiple_files=False)
 if uploaded_file is not None:
     st.write("File uploaded successfully!")
-    st.write("Plotting count rate...")
-    plot_count_rate(uploaded_file)
+    
+    # Read the first line of the file to determine the header
+    file_content = uploaded_file.read().decode('utf-8')
+    uploaded_file.seek(0)  # Reset file pointer to the beginning
+    first_line = file_content.split('\n')[0]
+    
+    # Determine which function to call based on the header
+    if first_line == "Time differences (ps)\tCounts per bin":
+        st.write("Detected g2 data format. Plotting g2 function...")
+        plot_g2(uploaded_file)
+    elif first_line == "Time (ps)\tChannel 1 - Count rate (counts/s)\tChannel 2 - Count rate (counts/s)":
+        st.write("Detected count rate data format. Plotting count rate...")
+        plot_count_rate(uploaded_file)
+    else:
+        st.write("Unrecognized file format.")
