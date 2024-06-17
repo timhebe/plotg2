@@ -7,8 +7,11 @@ from matplotlib.ticker import FuncFormatter
 import seaborn as sns
 import io
 
+# Set seaborn color palette
+sns.set_palette("husl")
+
 # Define your existing functions
-def plot_count_rate(files, start_times_ps, labels, plot_sum=False, title=None, poster_figure=False):
+def plot_count_rate(files, start_times_ps, labels, plot_sum=False, title=None, poster_figure=False, xlim=None, ylim=None):
     sns.set_palette("husl", len(files))
     plt.figure(figsize=(10, 6))
 
@@ -25,7 +28,12 @@ def plot_count_rate(files, start_times_ps, labels, plot_sum=False, title=None, p
 
     plt.xlabel('Time (s)')
     plt.ylabel('Count rate (counts/s)')
-    plt.xlim(0, 25)
+    if xlim:
+        plt.xlim(xlim)
+    else:
+        plt.xlim(0, 25)
+    if ylim:
+        plt.ylim(ylim)
     plt.legend()
     plt.grid(True)
 
@@ -50,7 +58,7 @@ def hz_to_khz(y, pos):
 def g2_function(x, p, q, y0, x0, a):
     return y0 + a * (1 - np.exp(-0.5 * p * np.abs(x-x0)) * (np.cos(0.5 * q * np.abs(x-x0)) + p/q * np.sin(0.5 * q * np.abs(x-x0))))
 
-def plot_g2(file, moleculeTitle='', initial_guess=(0.4, 0.1, 500, 0, 1000), printInfo=False):
+def plot_g2(file, moleculeTitle='', initial_guess=(0.4, 0.1, 500, 0, 1000), printInfo=False, xlim=None, ylim=None):
     data = pd.read_csv(file, sep='\t')
     data['Time differences (ns)'] = data['Time differences (ps)'] / 1000
     popt, _ = curve_fit(g2_function, data["Time differences (ns)"], data["Counts per bin"], p0=initial_guess)
@@ -77,8 +85,14 @@ def plot_g2(file, moleculeTitle='', initial_guess=(0.4, 0.1, 500, 0, 1000), prin
     plt.ylabel("Counts per bin")
     props = dict(boxstyle='round', facecolor='white', alpha=0.5)
     plt.text(0.05, 0.5, textstr, transform=plt.gca().transAxes, fontsize=12, verticalalignment='top', bbox=props)
-    plt.xlim(-max_time, max_time)
-    plt.ylim(0, 1.2 * max_count)
+    if xlim:
+        plt.xlim(xlim)
+    else:
+        plt.xlim(-max_time, max_time)
+    if ylim:
+        plt.ylim(ylim)
+    else:
+        plt.ylim(0, 1.2 * max_count)
     plt.grid(True)
     plt.legend()
     st.pyplot(plt)
@@ -97,8 +111,21 @@ if uploaded_files:
     
     if "Time differences" in first_line:
         st.write("Detected g2 data format. Plotting g2 function...")
+        
+        # Get additional parameters from the user
+        moleculeTitle = st.text_input("Molecule Title", value="")
+        initial_p = st.number_input("Initial p value", value=0.4)
+        initial_q = st.number_input("Initial q value", value=0.1)
+        initial_y0 = st.number_input("Initial y0 value", value=500)
+        initial_x0 = st.number_input("Initial x0 value", value=0)
+        initial_a = st.number_input("Initial a value", value=1000)
+        initial_guess = (initial_p, initial_q, initial_y0, initial_x0, initial_a)
+        printInfo = st.checkbox("Print fitting info", value=False)
+        xlim = st.slider("X-axis limit", -50.0, 50.0, (-50.0, 50.0))
+        ylim = st.slider("Y-axis limit", 0.0, 2000.0, (0.0, 2000.0))
+
         for file in uploaded_files:
-            plot_g2(file)
+            plot_g2(file, moleculeTitle, initial_guess, printInfo, xlim, ylim)
     elif "Count rate" in first_line:
         st.write("Detected count rate data format. Plotting count rate...")
 
@@ -108,7 +135,9 @@ if uploaded_files:
         plot_sum = st.radio("Plot sum of count rates?", ("No", "Yes")) == "Yes"
         title = st.text_input("Plot title", value="Count Rate vs Time")
         poster_figure = st.radio("Poster figure formatting?", ("No", "Yes")) == "Yes"
+        xlim = st.slider("X-axis limit", 0.0, 50.0, (0.0, 25.0))
+        ylim = st.slider("Y-axis limit", 0.0, 2000.0, (0.0, 2000.0))
 
-        plot_count_rate(uploaded_files, start_times_ps, labels, plot_sum, title, poster_figure)
+        plot_count_rate(uploaded_files, start_times_ps, labels, plot_sum, title, poster_figure, xlim, ylim)
     else:
         st.write("Unrecognized file format.")
