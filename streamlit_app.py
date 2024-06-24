@@ -6,10 +6,10 @@ import os
 
 def load_example_data(plot_type):
     example_data_path = os.path.join('example data', f'example {plot_type}.txt')
-    with open(example_data_path, 'rb') as file:
-        return file
+    with open(example_data_path, 'r') as file:
+        return file.read()
 
-st.title("Data Plotting and Fitting Application")
+st.title("Data Plotting Application")
 
 plot_type = st.selectbox("Select what to plot/fit", ["Count Rate", "g2", "Lifetime"])
 demo_mode = st.checkbox("Demo mode")
@@ -17,19 +17,18 @@ demo_mode = st.checkbox("Demo mode")
 if demo_mode:
     st.write("Demo mode selected. Loading example data...")
     if plot_type == "Count Rate":
-        # uploaded_files  = [load_example_data("count rate")]
-        uploaded_files = "example data/example count rate.txt"
+        uploaded_file = load_example_data("count rate")
     elif plot_type == "g2":
-        uploaded_files = [load_example_data("g2")]
+        uploaded_file = load_example_data("g2")
     elif plot_type == "Lifetime":
-        uploaded_files = [load_example_data("lifetime")]
+        uploaded_file = load_example_data("lifetime")
 else:
-    uploaded_files = st.file_uploader("Choose .txt files", type="txt", accept_multiple_files=False)
+    uploaded_file = st.file_uploader("Choose a .txt file", type="txt")
 
-if uploaded_files:
+if uploaded_file:
     if plot_type == "Count Rate":
-        plot_count_rate(uploaded_files)
+        plot_count_rate(uploaded_file)
     elif plot_type == "g2":
-        plot_g2(uploaded_files)
+        plot_g2(uploaded_file)
     elif plot_type == "Lifetime":
-        plot_lifetime(uploaded_files)
+        plot_lifetime(uploaded_file)
