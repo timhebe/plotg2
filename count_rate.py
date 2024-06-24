@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
 import seaborn as sns
 
 
@@ -17,7 +18,10 @@ def plot_count_rate(files):
     ylim = st.slider("Y-axis limit", 0.0, 2000.0, (0.0, 2000.0))
 
     for file, start_time_ps, label in zip(files, start_times_ps, labels):
-        data = pd.read_csv(file, delimiter='\t', header=0)
+        if isinstance(file, str):  # Demo mode
+            data = pd.read_csv(pd.compat.StringIO(file), delimiter='\t', header=0)
+        else:
+            data = pd.read_csv(file, delimiter='\t', header=0)
         data["Time (s)"] = (data["Time (ps)"] - start_time_ps) / 1e12
 
         if plot_sum:

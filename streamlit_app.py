@@ -9,7 +9,7 @@ def load_example_data(plot_type):
     with open(example_data_path, 'rb') as file:
         return file
 
-st.title("Data Plotting Application")
+st.title("Data Plotting and Fitting Application")
 
 plot_type = st.selectbox("Select what to plot/fit", ["Count Rate", "g2", "Lifetime"])
 demo_mode = st.checkbox("Demo mode")
@@ -23,7 +23,7 @@ if demo_mode:
     elif plot_type == "Lifetime":
         uploaded_files = [load_example_data("lifetime")]
 else:
-    uploaded_files = st.file_uploader("Choose .txt files", type="txt", accept_multiple_files=True)
+    uploaded_files = st.file_uploader("Choose .txt files", type="txt", accept_multiple_files=False)
 
 if uploaded_files:
     if plot_type == "Count Rate":
