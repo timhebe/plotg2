@@ -18,7 +18,7 @@ if demo_mode:
     st.write("Demo mode selected. Loading example data...")
     if plot_type == "Count Rate":
         # uploaded_files  = [load_example_data("count rate")]
-        uploaded_files = "example count rate.txt"
+        uploaded_files = open("example count rate.txt", 'rb')
     elif plot_type == "g2":
         uploaded_files = [load_example_data("g2")]
     elif plot_type == "Lifetime":
