@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 from scipy.optimize import curve_fit
 import numpy as np
+import io
 
 
 def g2_function(x, p, q, y0, x0, a):
@@ -24,7 +25,7 @@ def plot_g2(file):
         ylim = st.slider("Y-axis limit", 0.0, 2000.0, (0.0, 2000.0))
 
     if isinstance(file, str):  # Demo mode
-        data = pd.read_csv(pd.compat.StringIO(file), sep='\t')
+        data = pd.read_csv(io.StringIO(file), sep='\t')
     else:
         data = pd.read_csv(file, sep='\t')
     data['Time differences (ns)'] = data['Time differences (ps)'] / 1000

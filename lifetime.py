@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import io
 
 def plot_lifetime(file):
     with st.sidebar:
@@ -10,7 +11,7 @@ def plot_lifetime(file):
         ylim = st.slider("Y-axis limit", 0.0, 2000.0, (0.0, 2000.0))
 
     if isinstance(file, str):  # Demo mode
-        data = pd.read_csv(pd.compat.StringIO(file), delimiter='\t', header=0)
+        data = pd.read_csv(io.StringIO(file), delimiter='\t', header=0)
     else:
         data = pd.read_csv(file, delimiter='\t', header=0)
 
