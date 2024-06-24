@@ -18,11 +18,11 @@ def plot_g2(file):
         initial_q = st.number_input("Initial q value", value=0.1)
         initial_y0 = st.number_input("Initial y0 value", value=500)
         initial_x0 = st.number_input("Initial x0 value", value=0)
-        initial_a = st.number_input("Initial a value", value=1000)
+        initial_a = st.number_input("Initial a value", value=5e4)
         initial_guess = (initial_p, initial_q, initial_y0, initial_x0, initial_a)
         printInfo = st.checkbox("Print fitting info", value=False)
-        xlim = st.slider("X-axis limit", -50.0, 50.0, (-50.0, 50.0))
-        ylim = st.slider("Y-axis limit", 0.0, 2000.0, (0.0, 2000.0))
+        # xlim = st.slider("X-axis limit", -50.0, 50.0, (-50.0, 50.0))
+        # ylim = st.slider("Y-axis limit", 0.0, 2000.0, (0.0, 2000.0))
 
     if isinstance(file, str):  # Demo mode
         data = pd.read_csv(io.StringIO(file), sep='\t')
@@ -45,5 +45,5 @@ def plot_g2(file):
 
     fig = px.line(data, x="Time differences (ns)", y=["Counts per bin", "Fitted"],
                   title=f'g^2 (0) Measurement {moleculeTitle}')
-    fig.update_layout(xaxis_range=xlim, yaxis_range=ylim)
+    fig.update_layout()  # xaxis_range=xlim, yaxis_range=ylim)
     st.plotly_chart(fig)
