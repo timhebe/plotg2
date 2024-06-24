@@ -9,8 +9,8 @@ def plot_count_rate(files):
     sns.set_palette("husl", len(files))
     plt.figure(figsize=(10, 6))
 
-    start_times_ps = [st.number_input(f"Start time (ps) for {file.name}", value=0) for file in files]
-    labels = [st.text_input(f"Label for {file.name}", value=file.name) for file in files]
+    start_times_ps = st.number_input(f"Start time (ps)", value=0)
+    labels = st.text_input(f"Label", value="Count rate")
     plot_sum = st.radio("Plot sum of count rates?", ("No", "Yes")) == "Yes"
     title = st.text_input("Plot title", value="Count Rate vs Time")
     poster_figure = st.radio("Poster figure formatting?", ("No", "Yes")) == "Yes"
