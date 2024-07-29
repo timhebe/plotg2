@@ -8,7 +8,7 @@ from camera import plot_cam
 def main():
     st.title("Scientific Data Plotter")
 
-    plot_type = st.selectbox("Select the type of plot", ["", "Count Rate", "g2", "Lifetime", "Spectrum", "CAM"])
+    plot_type = st.selectbox("Select the type of plot", ["Choose one from the list below...", "Count Rate", "g2", "Lifetime", "Spectrum", "CAM"])
 
     device_type = ""
     if plot_type in ["Count Rate", "g2", "Lifetime"]:
@@ -22,20 +22,20 @@ def main():
     uploaded_file = None
     if demo_mode:
         if plot_type == "Count Rate":
-            uploaded_file = "example_data/example_count_rate.txt"
+            uploaded_file = "example_data/example count rate.txt"
         elif plot_type == "g2":
-            uploaded_file = "example_data/example_g2.txt"
+            uploaded_file = "example_data/example g2.txt"
         elif plot_type == "Lifetime":
-            uploaded_file = "example_data/example_lifetime.txt"
+            uploaded_file = "example_data/example lifetime.txt"
         elif plot_type == "Spectrum":
             if device_type == "Princeton Instruments":
-                uploaded_file = "example_data/example_spectrum_princeton.txt"
+                uploaded_file = "example_data/example spectrum PI.csv"
             else:
-                uploaded_file = "example_data/example_spectrum_andor.asc"
+                uploaded_file = "example_data/example spectrum Andor.asc"
         elif plot_type == "CAM":
-            uploaded_file = "example_data/example_camera.cam"
+            uploaded_file = "example_data/example camera.cam"
     else:
-        uploaded_file = st.file_uploader("Upload your data file", type=["txt", "dat", "asc", "cam"])
+        uploaded_file = st.file_uploader("Upload your data file", type=["txt", "dat", "asc", "cam", "csv"])
 
     if plot_type and uploaded_file:
         if plot_type == "Count Rate":
