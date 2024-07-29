@@ -6,8 +6,10 @@ import io
 def plot_cam(file):
     if isinstance(file, str):  # Demo mode
         name = file.split('/')[-1].split('.')[0]
+        st.write(name)
     else:
         name = file.name.split('.')[0]
+        st.write(name)
 
     PSF = CamReader(name+'.cam', True)
     plt.imshow(PSF[0])
