@@ -19,7 +19,7 @@ def plot_count_rate(file, device):
     plt.title("Count Rate vs Time")
     plt.legend()
     plt.grid(True)
-    st.pyplot()
+    st.pyplot(plt)
 
     buf = io.BytesIO()
     plt.savefig(buf, format="pdf")

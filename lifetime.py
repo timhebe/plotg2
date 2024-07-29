@@ -31,7 +31,7 @@ def plot_lifetime(file, device):
     if log_scale:
         plt.yscale('log')
     plt.grid(True)
-    st.pyplot()
+    st.pyplot(plt)
 
     buf = io.BytesIO()
     plt.savefig(buf, format="pdf")

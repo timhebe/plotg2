@@ -42,7 +42,7 @@ def plot_g2(file, device):
     plt.legend()
     plt.grid(True)
     plt.text(0.05, 0.95, textstr, transform=plt.gca().transAxes, verticalalignment='top')
-    st.pyplot()
+    st.pyplot(plt)
 
     buf = io.BytesIO()
     plt.savefig(buf, format="pdf")
