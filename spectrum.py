@@ -9,6 +9,7 @@ def plot_spectrum(file, device):
     else:
         if device == "Princeton Instruments":
             data = pd.read_csv(file)
+
         elif device == "Andor, Oxford Instruments":
             wavelengths = []
             intensities = []
@@ -26,9 +27,6 @@ def plot_spectrum(file, device):
                 'Intensity': intensities
             })
 
-            # data = pd.read_csv(file, delimiter=',', header=None)
-            # data.columns = ['Wavelength', 'Intensity']
-
     plt.figure()
     plt.plot(data['Wavelength'], data['Intensity'], label='Spectrum')
     plt.xlabel('Wavelength (nm)')
@@ -36,7 +34,7 @@ def plot_spectrum(file, device):
     plt.title(f'Spectrum ({device})')
     plt.legend()
     plt.grid(True)
-    st.pyplot()
+    st.pyplot(plt)
 
     buf = io.BytesIO()
     plt.savefig(buf, format="pdf")
