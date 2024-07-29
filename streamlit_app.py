@@ -22,11 +22,20 @@ def main():
     uploaded_file = None
     if demo_mode:
         if plot_type == "Count Rate":
-            uploaded_file = "example_data/example count rate.txt"
+            if device_type == "Swabian Instruments":
+                uploaded_file = "example_data/example count rate Swabian.txt"
+            else:
+                st.write("No demo data available for PicoQuant. Choose Swabian Instruments device or another plot.")
         elif plot_type == "g2":
-            uploaded_file = "example_data/example g2.txt"
+            if device_type == "Swabian Instruments":
+                uploaded_file = "example_data/example g2 Swabian.txt"
+            else:
+                uploaded_file = "example_data/example g2 PicoQuant.dat"
         elif plot_type == "Lifetime":
-            uploaded_file = "example_data/example lifetime.txt"
+            if device_type == "Swabian Instruments":
+                uploaded_file = "example_data/example lifetime Swabian.txt"
+            else:
+                st.write("No demo data available for PicoQuant. Choose Swabian Instruments device or another plot.")
         elif plot_type == "Spectrum":
             if device_type == "Princeton Instruments":
                 uploaded_file = "example_data/example spectrum PI.csv"
