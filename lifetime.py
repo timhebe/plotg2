@@ -7,8 +7,10 @@ def plot_lifetime(file, device):
     log_scale = st.sidebar.radio("Y-axis scale", ("Linear", "Log")) == "Log"
 
     if isinstance(file, str):  # Demo mode
+        name = file.split('/')[-1].split('.')[0]
         data = pd.read_csv(file, delimiter='\t', header=0)
     else:
+        name = file.name.split('.')[0]
         if device == "Swabian Instruments":
             data = pd.read_csv(file, delimiter='\t', header=0)
         elif device == "PicoQuant":
@@ -35,7 +37,7 @@ def plot_lifetime(file, device):
 
     buf = io.BytesIO()
     plt.savefig(buf, format="pdf")
-    st.download_button("Download as PDF", buf.getvalue(), file_name=f"{file.split('/')[-1].split('.')[0]}.pdf")
+    st.download_button("Download as PDF", buf.getvalue(), file_name=f"{name}.pdf")
     buf.seek(0)
     plt.savefig(buf, format="png")
-    st.download_button("Download as PNG", buf.getvalue(), file_name=f"{file.split('/')[-1].split('.')[0]}.png")
+    st.download_button("Download as PNG", buf.getvalue(), file_name=f"{name}.png")

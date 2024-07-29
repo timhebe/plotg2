@@ -5,8 +5,10 @@ import io
 
 def plot_spectrum(file, device):
     if isinstance(file, str):  # Demo mode
+        name = file.split('/')[-1].split('.')[0]
         data = pd.read_csv(file)
     else:
+        name = file.name.split('.')[0]
         if device == "Princeton Instruments":
             data = pd.read_csv(file)
 
@@ -38,7 +40,7 @@ def plot_spectrum(file, device):
 
     buf = io.BytesIO()
     plt.savefig(buf, format="pdf")
-    st.download_button("Download as PDF", buf.getvalue(), file_name=f"{file.split('/')[-1].split('.')[0]}.pdf")
+    st.download_button("Download as PDF", buf.getvalue(), file_name=f"{name}.pdf")
     buf.seek(0)
     plt.savefig(buf, format="png")
-    st.download_button("Download as PNG", buf.getvalue(), file_name=f"{file.split('/')[-1].split('.')[0]}.png")
+    st.download_button("Download as PNG", buf.getvalue(), file_name=f"{name}.png")
