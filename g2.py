@@ -27,7 +27,7 @@ def plot_g2(file, device):
             data = pd.read_csv(file, delimiter='\t', header=0)
         elif device == "PicoQuant":
             data = pd.read_csv(file, delimiter='\t', skiprows=1)
-            data.columns = ['Time_ns', 'G_t']
+            data.columns = ['Time[ns]', 'G(t)[]']
 
     if device == "Swabian Instruments":
         data['Time differences (ns)'] = data['Time differences (ps)'] / 1000
@@ -58,7 +58,7 @@ def plot_g2(file, device):
     plt.title(f"g2 Measurement ({device})")
     plt.legend()
     plt.grid(True)
-    plt.text(0.05, 0.95, textstr, transform=plt.gca().transAxes, verticalalignment='top')
+    plt.text(0.05, 0.25, textstr, transform=plt.gca().transAxes, verticalalignment='top')
     st.pyplot(plt)
 
     buf = io.BytesIO()
