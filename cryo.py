@@ -601,9 +601,24 @@ class CamReader(object):
             otherwise, the first time the length is determined or a large-index frame is accessed can take a long time (all subsequent calls are faster).
     """
 
+    """
     def __init__(self, path, same_size=False):
         object.__init__(self)
         self.path = self.normalize_path(path)
+        self.frame_offsets = [0]
+        self.frames_num = None
+        self.same_size = same_size
+        self.channel_intensities = None
+    """
+
+    # class to accept a file-like object:
+    def __init__(self, file_like_object, same_size=False):
+        object.__init__(self)
+        if isinstance(file_like_object, str):
+            self.path = self.normalize_path(file_like_object)
+        else:
+            self.path = None
+            self.file_like_object = file_like_object
         self.frame_offsets = [0]
         self.frames_num = None
         self.same_size = same_size
@@ -613,7 +628,7 @@ class CamReader(object):
         """
         Standard EOF function.
         
-        Return ``True`` if the the marker is at the end of the file.
+        Return ``True`` if the marker is at the end of the file.
         If ``strict==True``, only return ``True`` if the marker is exactly at the end of file; otherwise, return ``True`` if it's at the end of further.
         """
         p = f.tell()
@@ -643,10 +658,22 @@ class CamReader(object):
         """Normalize filesystem path (case and origin). If two paths are identical, they should be equal when normalized."""
         return os.path.normcase(os.path.abspath(p))
 
+    """
     def _read_frame_at(self, offset):
         with open(self.path, "rb") as f:
             f.seek(offset)
             return self._read_cam_frame(f)
+    """
+
+    # to accept a file-like object:
+    def _read_frame_at(self, offset):
+        if self.path:
+            with open(self.path, "rb") as f:
+                f.seek(offset)
+                return self._read_cam_frame(f)
+        else:
+            self.file_like_object.seek(offset)
+            return self._read_cam_frame(self.file_like_object)
 
     def _read_next_frame(self, f, skip=False):
         data = self._read_cam_frame(f, skip=skip)
