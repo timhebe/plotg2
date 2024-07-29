@@ -27,6 +27,7 @@ def plot_g2(file, device):
             data = pd.read_csv(file, delimiter='\t', header=0)
         elif device == "PicoQuant":
             data = pd.read_csv(file, delimiter='\t', skiprows=1)
+            st.write(data)
             data.columns = ['Time[ns]', 'G(t)[]']
 
     if device == "Swabian Instruments":
