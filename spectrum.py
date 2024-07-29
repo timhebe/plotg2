@@ -10,8 +10,26 @@ def plot_spectrum(file, device):
         if device == "Princeton Instruments":
             data = pd.read_csv(file, delimiter='\t', header=0)
         elif device == "Andor, Oxford Instruments":
-            data = pd.read_csv(file, delimiter=',', header=None)
-            data.columns = ['Wavelength', 'Intensity']
+
+            wavelengths = []
+            intensities = []
+
+            # Read the file manually line by line
+            with open(file, 'r') as dataset:
+                for line in dataset:
+                    parts = line.strip().split(',')
+                    if len(parts) >= 2:
+                        wavelengths.append(float(parts[0]))
+                        intensities.append(float(parts[1]))
+
+            # Create a DataFrame from the lists
+            data = pd.DataFrame({
+                'Wavelength': wavelengths,
+                'Intensity': intensities
+            })
+
+            # data = pd.read_csv(file, delimiter=',', header=None)
+            # data.columns = ['Wavelength', 'Intensity']
 
     plt.figure()
     plt.plot(data['Wavelength'], data['Intensity'], label='Spectrum')
