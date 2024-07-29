@@ -13,10 +13,9 @@ def plot_g2(file, device):
         moleculeTitle = st.text_input("Molecule Title", value="")
         initial_p = st.number_input("Initial p value", value=0.4)
         initial_q = st.number_input("Initial q value", value=0.1)
-        initial_y0 = st.number_input("Initial y0 value", value=500)
+        # initial_y0 = st.number_input("Initial y0 value", value=500)
         initial_x0 = st.number_input("Initial x0 value", value=0)
-        initial_a = st.number_input("Initial a value", value=5e4)
-        initial_guess = (initial_p, initial_q, initial_y0, initial_x0, initial_a)
+        # initial_a = st.number_input("Initial a value", value=5e4)
         printInfo = st.checkbox("Print fitting info", value=False)
 
     if isinstance(file, str):  # Demo mode
@@ -35,9 +34,12 @@ def plot_g2(file, device):
         x = data["Time differences (ns)"]
         y = data["Counts per bin"]
     elif device == "PicoQuant":
-        x = data["Time_ns"]
-        y = data["G_t"]
+        x = data["Time[ns]"]
+        y = data["G(t)[]"]
 
+    initial_y0 = min(y)
+    initial_a = max(y) - initial_y0
+    initial_guess = (initial_p, initial_q, initial_y0, initial_x0, initial_a)
     popt, _ = curve_fit(g2_function, x, y, p0=initial_guess)
     y0 = popt[2]
     a = popt[4]
