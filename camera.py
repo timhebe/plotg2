@@ -24,7 +24,7 @@ def plot_cam(file):
 
         plt.imshow(CAM[0])
         plt.title("Cryo Measurement")
-        st.pyplot()
+        st.pyplot(plt)
 
         buf = io.BytesIO()
         plt.savefig(buf, format="pdf")
