@@ -5,15 +5,13 @@ import io
 
 def plot_spectrum(file, device):
     if isinstance(file, str):  # Demo mode
-        data = pd.read_csv(file, delimiter='\t', header=0)
+        data = pd.read_csv(file)
     else:
         if device == "Princeton Instruments":
-            data = pd.read_csv(file, delimiter='\t', header=0)
+            data = pd.read_csv(file)
         elif device == "Andor, Oxford Instruments":
-
             wavelengths = []
             intensities = []
-
             # Read the file manually line by line
             with open(file, 'r') as dataset:
                 for line in dataset:
