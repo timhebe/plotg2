@@ -8,27 +8,30 @@ import io
 def g2_function(x, p, q, y0, x0, a):
     return y0 + a * (1 - np.exp(-0.5 * p * np.abs(x-x0)) * (np.cos(0.5 * q * np.abs(x-x0)) + p/q * np.sin(0.5 * q * np.abs(x-x0))))
 
+def read_data(file, device):
+    global data
+    if device == "Swabian Instruments":
+        data = pd.read_csv(file, delimiter='\t', header=0)
+    elif device == "PicoQuant":
+        data = pd.read_csv(file, delimiter='\t', skiprows=1)
+        st.write(data)
+        data.columns = ['Time[ns]', 'G(t)[]']
+    return data
+
 def plot_g2(file, device):
     with st.sidebar:
         moleculeTitle = st.text_input("Molecule Title", value="")
         initial_p = st.number_input("Initial p value", value=0.4)
         initial_q = st.number_input("Initial q value", value=0.1)
-        # initial_y0 = st.number_input("Initial y0 value", value=500)
         initial_x0 = st.number_input("Initial x0 value", value=0)
-        # initial_a = st.number_input("Initial a value", value=5e4)
         printInfo = st.checkbox("Print fitting info", value=False)
 
     if isinstance(file, str):  # Demo mode
         name = file.split('/')[-1].split('.')[0]
-        data = pd.read_csv(file, delimiter='\t', header=0)
+        data = read_data(file, device)
     else:
         name = file.name.split('.')[0]
-        if device == "Swabian Instruments":
-            data = pd.read_csv(file, delimiter='\t', header=0)
-        elif device == "PicoQuant":
-            data = pd.read_csv(file, delimiter='\t', skiprows=1)
-            st.write(data)
-            data.columns = ['Time[ns]', 'G(t)[]']
+        data = read_data(file, device)
 
     if device == "Swabian Instruments":
         data['Time differences (ns)'] = data['Time differences (ps)'] / 1000
@@ -55,7 +58,10 @@ def plot_g2(file, device):
     plt.plot(x, y, label="Data")
     plt.plot(x, g2_function(x, *popt), label="Fit", linestyle='--')
     plt.xlabel("Time differences (ns)")
-    plt.ylabel("Counts per bin")
+    if device == "Swabian Instruments":
+        plt.ylabel("Counts per bin")
+    elif device == "PicoQuant":
+        plt.ylabel(r"g^{(2)} (\tau)$")
     plt.title(f"g2 Measurement ({device})")
     plt.legend()
     plt.grid(True)

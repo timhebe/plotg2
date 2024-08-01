@@ -3,31 +3,37 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import io
 
+def read_data(file, device):
+    global data
+    if device == "Princeton Instruments":
+        data = pd.read_csv(file)
+
+    elif device == "Andor, Oxford Instruments":
+        wavelengths = []
+        intensities = []
+        # Read the file manually line by line
+        with open(file, 'r') as dataset:
+            for line in dataset:
+                parts = line.strip().split(',')
+                if len(parts) >= 2:
+                    wavelengths.append(float(parts[0]))
+                    intensities.append(float(parts[1]))
+
+        # Create a DataFrame from the lists
+        data = pd.DataFrame({
+            'Wavelength': wavelengths,
+            'Intensity': intensities
+        })
+
+    return data
+
 def plot_spectrum(file, device):
     if isinstance(file, str):  # Demo mode
         name = file.split('/')[-1].split('.')[0]
-        data = pd.read_csv(file)
+        data = read_data(file, device)
     else:
         name = file.name.split('.')[0]
-        if device == "Princeton Instruments":
-            data = pd.read_csv(file)
-
-        elif device == "Andor, Oxford Instruments":
-            wavelengths = []
-            intensities = []
-            # Read the file manually line by line
-            with open(file, 'r') as dataset:
-                for line in dataset:
-                    parts = line.strip().split(',')
-                    if len(parts) >= 2:
-                        wavelengths.append(float(parts[0]))
-                        intensities.append(float(parts[1]))
-
-            # Create a DataFrame from the lists
-            data = pd.DataFrame({
-                'Wavelength': wavelengths,
-                'Intensity': intensities
-            })
+        data = read_data(file, device)
 
     plt.figure()
     plt.plot(data['Wavelength'], data['Intensity'], label='Spectrum')
