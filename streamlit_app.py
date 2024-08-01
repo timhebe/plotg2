@@ -5,6 +5,32 @@ from lifetime import plot_lifetime
 from spectrum import plot_spectrum
 from camera import plot_cam
 
+def add_footer():
+    st.markdown(
+        """
+        <style>
+        footer {
+            visibility: hidden;
+        }
+        .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: #f1f1f1;
+            color: #555555;
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+        }
+        </style>
+        <div class="footer">
+            <p>Created by Tim Hebenstreit. For any questions, please contact me at: <a href="mailto:tim.hebenstreit@mpl.mpg.de">tim.hebenstreit@mpl.mpg.de</a></p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
 def main():
     st.title("Scientific Data Plotter")
 
@@ -57,6 +83,8 @@ def main():
             plot_spectrum(uploaded_file, device_type)
         elif plot_type == "CAM":
             plot_cam(uploaded_file)
+
+    add_footer()
 
 if __name__ == "__main__":
     main()
