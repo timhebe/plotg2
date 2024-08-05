@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import io
 import numpy as np
 from scipy.optimize import curve_fit
+from scipy.signal import find_peaks
 
 # Define single exponential decay function
 def exp_decay(x, y0, N0, t0, tau):
@@ -16,6 +17,7 @@ def double_exp_decay(x, y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2):
 def plot_lifetime(file, device):
     log_scale = st.sidebar.radio("Y-axis scale", ("Linear", "Log")) == "Log"
     fit_type = st.sidebar.selectbox("Fit Type", ["None", "Single Exponential", "Double Exponential"])
+    show_fit_params = st.sidebar.checkbox("Show Fit Parameters", value=False)
 
     if isinstance(file, str):  # Demo mode
         name = file.split('/')[-1].split('.')[0]
@@ -36,6 +38,20 @@ def plot_lifetime(file, device):
         x = data["Time_ns"]
         y = data["Counts_per_bin"]
 
+    # Peak finding
+    peaks, properties = find_peaks(y, prominence=np.max(y) / 2)
+    data_pk = y[peaks]
+
+    to_delete = np.where(data_pk < max(data_pk) / 100)
+    data_pk = np.delete(data_pk, to_delete)
+    peaks = np.delete(peaks, to_delete)
+
+    first_peak = peaks[0]
+    start = first_peak * 0.004 + 0.050
+    stop = first_peak * 0.004 + 1
+    data_fit = y[int(start / 0.004):int(stop / 0.004)]
+    X_fit = 0.004 * np.arange(0, len(data_fit))
+
     plt.figure()
     plt.plot(x, y, label="Data")
     plt.xlabel("Time (ns)")
@@ -44,6 +60,7 @@ def plot_lifetime(file, device):
     if log_scale:
         plt.yscale('log')
 
+    """
     if fit_type == "Single Exponential":
         # Sidebar for single exponential fitting parameters
         st.sidebar.subheader("Single Exponential Fit Parameters")
@@ -71,7 +88,42 @@ def plot_lifetime(file, device):
         params = [y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2]
         popt, _ = curve_fit(double_exp_decay, x, y, p0=params)
         plt.plot(x, double_exp_decay(x, *popt), 'r--', label='Double Exp Fit: y0=%.3f, N0_1=%.3f, t0_1=%.3f, tau_1=%.3f, N0_2=%.3f, t0_2=%.3f, tau_2=%.3f' % tuple(popt))
+    """
 
+    if fit_type != "None":
+        if show_fit_params:
+            st.sidebar.subheader(f"{fit_type} Fit Parameters")
+
+        if fit_type == "Single Exponential":
+            if show_fit_params:
+                y0 = st.sidebar.slider("y0", 0.0, 1000.0, 0.0)
+                N0 = st.sidebar.slider("N0", 0.0, 1000.0, max(y))
+                t0 = st.sidebar.slider("t0", 0.0, max(x), 0.0)
+                tau = st.sidebar.slider("tau", 0.1, max(x), 10.0)
+            else:
+                y0, N0, t0, tau = 0.0, max(y), 0.0, 10.0
+
+            params = [y0, N0, t0, tau]
+            popt, _ = curve_fit(exp_decay, X_fit, data_fit, p0=params)
+            plt.plot(X_fit + start, exp_decay(X_fit, *popt), 'r--', label='Single Exp Fit')
+
+        elif fit_type == "Double Exponential":
+            if show_fit_params:
+                y0 = st.sidebar.slider("y0", 0.0, 1000.0, 0.0)
+                N0_1 = st.sidebar.slider("N0_1", 0.0, 1000.0, max(y))
+                t0_1 = st.sidebar.slider("t0_1", 0.0, max(x), 0.0)
+                tau_1 = st.sidebar.slider("tau_1", 0.1, max(x), 10.0)
+                N0_2 = st.sidebar.slider("N0_2", 0.0, 1000.0, max(y) / 2)
+                t0_2 = st.sidebar.slider("t0_2", 0.0, max(x), 0.0)
+                tau_2 = st.sidebar.slider("tau_2", 0.1, max(x), 10.0)
+            else:
+                y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2 = 0.0, max(y), 0.0, 10.0, max(y) / 2, 0.0, 10.0
+
+            params = [y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2]
+            popt, _ = curve_fit(double_exp_decay, X_fit, data_fit, p0=params)
+            plt.plot(X_fit + start, double_exp_decay(X_fit, *popt), 'r--', label='Double Exp Fit')
+
+    plt.plot(peaks * 0.004, data_pk, 'o', label="Peaks")
     plt.legend()
     plt.grid(True)
     st.pyplot(plt)
