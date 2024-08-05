@@ -31,7 +31,7 @@ def double_exp_decay(x, y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2):
 def plot_lifetime(file, device):
     log_scale = st.sidebar.radio("Y-axis scale", ("Linear", "Log")) == "Log"
     fit_type = st.sidebar.selectbox("Fit Type", ["None", "Single Exponential", "Double Exponential"])
-    # show_fit_params = st.sidebar.checkbox("Show Fit Parameters", value=False)
+    show_fit_params = st.sidebar.checkbox("Show Fit Parameters", value=False)
 
     if isinstance(file, str):  # Demo mode
         name = file.split('/')[-1].split('.')[0]
@@ -84,19 +84,23 @@ def plot_lifetime(file, device):
         plt.axvline(start, linestyle="--", color="seagreen")
         plt.axvline(stop, linestyle="--", color="firebrick")
 
-        st.write(start, stop)
-
     if fit_type == "Single Exponential":
-        # Sidebar for single exponential fitting parameters
-        st.sidebar.subheader("Single Exponential Fit Parameters")
-        y0 = st.sidebar.slider("y0", 0.0, 1000.0, 0.0)
-        N0 = st.sidebar.slider("N0", 0.0, 1000.0, float(max(y)))
-        t0 = st.sidebar.slider("t0", 0.0, float(max(x)), 0.0)
-        tau = st.sidebar.slider("tau", 0.1, float(max(x)), 10.0)
+
+        y0, N0, t0, tau = [0, first_peak, 0, 10]
 
         params = [y0, N0, t0, tau]
         popt, _ = curve_fit(exp_decay, X_fit, Y_fit, p0=params)
         plt.plot(X_fit + start, exp_decay(X_fit, *popt), 'r--', label='Single Exp Fit: y0=%.3f, N0=%.3f, t0=%.3f, tau=%.3f' % tuple(popt))
+
+        # Sidebar for single exponential fitting parameters
+        if show_fit_params:
+            st.sidebar.subheader("Single Exponential Fit Parameters")
+            y0 = st.sidebar.slider("y0", 0.0, 1000.0, 0.0)
+            N0 = st.sidebar.slider("N0", 0.0, 1000.0, float(max(y)))
+            t0 = st.sidebar.slider("t0", 0.0, float(max(x)), 0.0)
+            tau = st.sidebar.slider("tau", 0.1, float(max(x)), 10.0)
+
+            # to be finished...
 
     elif fit_type == "Double Exponential":
         # Sidebar for double exponential fitting parameters
