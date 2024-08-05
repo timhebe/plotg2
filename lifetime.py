@@ -54,9 +54,10 @@ def plot_lifetime(file, device):
 
     # Peak finding
     peaks, properties = find_peaks(y, prominence=np.max(y) / 2)
+    x_pk = x[peaks]
     data_pk = y[peaks]
 
-    st.write(peaks, properties)
+    st.write(x_pk, data_pk)
 
     to_delete = np.where(data_pk < max(data_pk) / 100)
     data_pk = np.delete(data_pk, to_delete)
