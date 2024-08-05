@@ -80,6 +80,9 @@ def plot_lifetime(file, device):
         Y_fit = y[int(start):int(stop)]
         X_fit = np.arange(0, len(Y_fit))
 
+        plt.axvline(start, linestyle="--", color="seagreen")
+        plt.axvline(stop, linestyle="--", color="firebrick")
+
         st.write(start, stop)
 
     if fit_type == "Single Exponential":
@@ -92,7 +95,7 @@ def plot_lifetime(file, device):
 
         params = [y0, N0, t0, tau]
         popt, _ = curve_fit(exp_decay, X_fit, Y_fit, p0=params)
-        plt.plot(X_fit, exp_decay(X_fit, *popt), 'r--', label='Single Exp Fit: y0=%.3f, N0=%.3f, t0=%.3f, tau=%.3f' % tuple(popt))
+        plt.plot(X_fit + start, exp_decay(X_fit, *popt), 'r--', label='Single Exp Fit: y0=%.3f, N0=%.3f, t0=%.3f, tau=%.3f' % tuple(popt))
 
     elif fit_type == "Double Exponential":
         # Sidebar for double exponential fitting parameters
