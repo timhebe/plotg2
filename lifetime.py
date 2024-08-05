@@ -5,10 +5,24 @@ import io
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.signal import find_peaks
+from lmfit import Model, Parameters
 
 # Define single exponential decay function
 def exp_decay(x, y0, N0, t0, tau):
     return y0 + N0 * np.exp(-(x - t0)/tau)
+
+def fit_exp_decay(Y_fit, X_fit): # for trions (not implemented)
+    mod = Model(exp_decay)
+
+    # Initial parameter
+    pars = Parameters()
+    pars.add('y0', value=1)
+    pars.add('N0', value=max(X_fit))
+    pars.add('t0', value=0, min=0)
+    pars.add('tau', value=7)
+
+    result = mod.fit(Y_fit, pars, x=X_fit)
+    return result
 
 # Define double exponential decay function
 def double_exp_decay(x, y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2):
@@ -17,8 +31,7 @@ def double_exp_decay(x, y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2):
 def plot_lifetime(file, device):
     log_scale = st.sidebar.radio("Y-axis scale", ("Linear", "Log")) == "Log"
     fit_type = st.sidebar.selectbox("Fit Type", ["None", "Single Exponential", "Double Exponential"])
-    # show_fit_params = st.sidebar.checkbox("Show Fit Parameters", value=False)
-    show_fit_results = st.sidebar.checkbox("Show Fit Results", False)
+    show_fit_params = st.sidebar.checkbox("Show Fit Parameters", value=False)
 
     if isinstance(file, str):  # Demo mode
         name = file.split('/')[-1].split('.')[0]
@@ -67,64 +80,90 @@ def plot_lifetime(file, device):
         # Convert start and stop times (in ns) to indices
         start_idx = np.searchsorted(x, start)
         stop_idx = np.searchsorted(x, stop)
-        data_fit = y[start_idx:stop_idx]
-        X_fit = np.linspace(0, stop - start, num=len(data_fit))
+        Y_fit = y[start_idx:stop_idx]
+        X_fit = np.linspace(0, stop - start, num=len(Y_fit))
 
         plt.plot(x_pk, data_pk, 'o', label="Peaks")
         plt.axvline(start, linestyle="--", color="seagreen")
         plt.axvline(stop, linestyle="--", color="firebrick")
 
-        if fit_type == "Single Exponential":
-            y0, N0, t0, tau = [0, first_peak, 0, 10]
-            params = [y0, N0, t0, tau]
-            param_names = ['y0', 'N0', 't0', 'tau']
-            popt, _ = curve_fit(exp_decay, X_fit, data_fit, p0=params)
-            Y_fit = exp_decay(X_fit, *popt)
-            formula = r"$y(x) = y_0 + N_0 \cdot \exp\left(\frac{-(x - t_0)}{\tau}\right)$"
+    if fit_type == "Single Exponential":
+        y0, N0, t0, tau = [0, first_peak, 0, 10]
+        params = [y0, N0, t0, tau]
+        popt, _ = curve_fit(exp_decay, X_fit, Y_fit, p0=params)
+        plt.plot(X_fit + start, exp_decay(X_fit, *popt), 'r--', label='Single Exp Fit: y0=%.3f, N0=%.3f, t0=%.3f, tau=%.3f' % tuple(popt))
 
-            """
-            # Sidebar for single exponential fitting parameters
+        # Sidebar for single exponential fitting parameters
+        if show_fit_params:
+            st.sidebar.subheader("Single Exponential Fit Parameters")
+            y0 = st.sidebar.slider("y0", 0.0, 1000.0, 0.0)
+            N0 = st.sidebar.slider("N0", 0.0, 1000.0, float(max(y)))
+            t0 = st.sidebar.slider("t0", 0.0, float(max(x)), 0.0)
+            tau = st.sidebar.slider("tau", 0.1, float(max(x)), 10.0)
+
+            # to be finished...
+
+    elif fit_type == "Double Exponential":
+        y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2, = [0, first_peak, 0, 10, first_peak/2, 0, 10]
+        params = [y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2]
+        popt, _ = curve_fit(double_exp_decay, X_fit, Y_fit, p0=params)
+        plt.plot(X_fit + start, double_exp_decay(X_fit, *popt), 'r--', label='Double Exp Fit: y0=%.3f, N0_1=%.3f, t0_1=%.3f, tau_1=%.3f, N0_2=%.3f, t0_2=%.3f, tau_2=%.3f' % tuple(popt))
+
+        # Sidebar for double exponential fitting parameters
+        if show_fit_params:
+            st.sidebar.subheader("Double Exponential Fit Parameters")
+            y0 = st.sidebar.slider("y0", 0.0, 1000.0, 0.0)
+            N0_1 = st.sidebar.slider("N0_1", 0.0, 1000.0, float(max(y)))
+            t0_1 = st.sidebar.slider("t0_1", 0.0, float(max(x)), 0.0)
+            tau_1 = st.sidebar.slider("tau_1", 0.1, float(max(x)), 10.0)
+
+            N0_2 = st.sidebar.slider("N0_2", 0.0, 1000.0, float(max(y)) / 2)
+            t0_2 = st.sidebar.slider("t0_2", 0.0, float(max(x)), 0.0)
+            tau_2 = st.sidebar.slider("tau_2", 0.1, float(max(x)), 10.0)
+
+    """
+    if fit_type != "None":
+        if show_fit_params:
+            st.sidebar.subheader(f"{fit_type} Fit Parameters")
+
+        if fit_type == "Single Exponential":
             if show_fit_params:
-                st.sidebar.subheader("Single Exponential Fit Parameters")
                 y0 = st.sidebar.slider("y0", 0.0, 1000.0, 0.0)
-                N0 = st.sidebar.slider("N0", 0.0, 1000.0, float(max(y)))
-                t0 = st.sidebar.slider("t0", 0.0, float(max(x)), 0.0)
-                tau = st.sidebar.slider("tau", 0.1, float(max(x)), 10.0)
-                # to be finished...
-            """
+                N0 = st.sidebar.slider("N0", 0.0, 1000.0, max(y))
+                t0 = st.sidebar.slider("t0", 0.0, max(x), 0.0)
+                tau = st.sidebar.slider("tau", 0.1, max(x), 10.0)
+            else:
+                y0, N0, t0, tau = 0.0, max(y), 0.0, 10.0
+
+            # params = [y0, N0, t0, tau]
+            # fit = fit_exp_decay(Y_fit, X_fit)
+            # gets the y value of the fit
+            # Y_fit = fit.best_fit
+            # Lifetime
+            tau = fit.params['tau'].value
+            plt.plot(X_fit + start, Y_fit, 'r--', label='Single Exp Fit')
+
+            popt, _ = curve_fit(exp_decay, X_fit, Y_fit, p0=params)
+            plt.plot(X_fit + start, exp_decay(X_fit, *popt), 'r--', label='Single Exp Fit')
 
         elif fit_type == "Double Exponential":
-            y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2, = [0, first_peak, 0, 10, first_peak/2, 0, 10]
-            params = [y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2]
-            param_names = ['y0', 'N0_1', 't0_1', 'tau_1', 'N0_2', 't0_2', 'tau_2']
-            popt, _ = curve_fit(double_exp_decay, X_fit, data_fit, p0=params)
-            Y_fit = double_exp_decay(X_fit, *popt)
-            formula = r"$y(x) = y_0 + N_{0_1} \cdot \exp\left(\frac{-(x - t_{0_1})}{\tau_1}\right) + N_{0_2} \cdot \exp\left(\frac{-(x - t_{0_2})}{\tau_2}\right)$"
-
-            """
-            # Sidebar for double exponential fitting parameters
             if show_fit_params:
-                st.sidebar.subheader("Double Exponential Fit Parameters")
                 y0 = st.sidebar.slider("y0", 0.0, 1000.0, 0.0)
-                N0_1 = st.sidebar.slider("N0_1", 0.0, 1000.0, float(max(y)))
-                t0_1 = st.sidebar.slider("t0_1", 0.0, float(max(x)), 0.0)
-                tau_1 = st.sidebar.slider("tau_1", 0.1, float(max(x)), 10.0)
-    
-                N0_2 = st.sidebar.slider("N0_2", 0.0, 1000.0, float(max(y)) / 2)
-                t0_2 = st.sidebar.slider("t0_2", 0.0, float(max(x)), 0.0)
-                tau_2 = st.sidebar.slider("tau_2", 0.1, float(max(x)), 10.0)
-            """
+                N0_1 = st.sidebar.slider("N0_1", 0.0, 1000.0, max(y))
+                t0_1 = st.sidebar.slider("t0_1", 0.0, max(x), 0.0)
+                tau_1 = st.sidebar.slider("tau_1", 0.1, max(x), 10.0)
+                N0_2 = st.sidebar.slider("N0_2", 0.0, 1000.0, max(y) / 2)
+                t0_2 = st.sidebar.slider("t0_2", 0.0, max(x), 0.0)
+                tau_2 = st.sidebar.slider("tau_2", 0.1, max(x), 10.0)
+            else:
+                y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2 = 0.0, max(y), 0.0, 10.0, max(y) / 2, 0.0, 10.0
 
-        plt.plot(X_fit + start, Y_fit, 'r--', label=f'{fit_type} Fit')
+            params = [y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2]
+            popt, _ = curve_fit(double_exp_decay, X_fit, Y_fit, p0=params)
+            plt.plot(X_fit + start, double_exp_decay(X_fit, *popt), 'r--', label='Double Exp Fit')
+    """
 
-        if show_fit_results:
-            st.markdown(f"### Fitting Formula")
-            st.markdown(f"${formula}$")
-            st.markdown("### Fitting Parameters")
-            for name, param in zip(param_names, popt):
-                st.write(f"{name}: {param:.3f}")
-
-    plt.legend()
+    # plt.legend()
     plt.grid(True)
     st.pyplot(plt)
 
