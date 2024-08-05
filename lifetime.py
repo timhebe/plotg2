@@ -80,7 +80,7 @@ def plot_lifetime(file, device):
         # Convert start and stop times (in ns) to indices
         start_idx = np.searchsorted(x, start)
         stop_idx = np.searchsorted(x, stop)
-        Y_fit = y[start.value:stop.value]
+        Y_fit = y[start_idx:stop_idx]
         X_fit = np.linspace(0, stop - start, num=len(Y_fit))
 
         plt.plot(x_pk, data_pk, 'o', label="Peaks")
