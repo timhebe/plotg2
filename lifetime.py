@@ -80,6 +80,7 @@ def plot_lifetime(file, device):
         Y_fit = y[int(start):int(stop)]
         X_fit = np.arange(0, len(Y_fit))
 
+        plt.plot(x_pk, data_pk, 'o', label="Peaks")
         plt.axvline(start, linestyle="--", color="seagreen")
         plt.axvline(stop, linestyle="--", color="firebrick")
 
