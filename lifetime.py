@@ -77,6 +77,7 @@ def plot_lifetime(file, device):
         if fit_type == "Single Exponential":
             y0, N0, t0, tau = [0, first_peak, 0, 10]
             params = [y0, N0, t0, tau]
+            param_names = ['y0', 'N0', 't0', 'tau']
             popt, _ = curve_fit(exp_decay, X_fit, data_fit, p0=params)
             Y_fit = exp_decay(X_fit, *popt)
             formula = r"$y(x) = y_0 + N_0 \cdot \exp\left(\frac{-(x - t_0)}{\tau}\right)$"
@@ -95,6 +96,7 @@ def plot_lifetime(file, device):
         elif fit_type == "Double Exponential":
             y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2, = [0, first_peak, 0, 10, first_peak/2, 0, 10]
             params = [y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2]
+            param_names = ['y0', 'N0_1', 't0_1', 'tau_1', 'N0_2', 't0_2', 'tau_2']
             popt, _ = curve_fit(double_exp_decay, X_fit, data_fit, p0=params)
             Y_fit = double_exp_decay(X_fit, *popt)
             formula = r"$y(x) = y_0 + N_{0_1} \cdot \exp\left(\frac{-(x - t_{0_1})}{\tau_1}\right) + N_{0_2} \cdot \exp\left(\frac{-(x - t_{0_2})}{\tau_2}\right)$"
@@ -119,8 +121,8 @@ def plot_lifetime(file, device):
             st.markdown(f"### Fitting Formula")
             st.markdown(f"${formula}$")
             st.markdown("### Fitting Parameters")
-            for i, param in enumerate(popt):
-                st.write(f"Parameter {i + 1}: {param:.2f}")
+            for name, param in zip(param_names, popt):
+                st.write(f"{name}: {param:.3f}")
 
     plt.legend()
     plt.grid(True)
