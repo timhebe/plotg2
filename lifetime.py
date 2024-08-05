@@ -88,11 +88,9 @@ def plot_lifetime(file, device):
         plt.axvline(stop, linestyle="--", color="firebrick")
 
     if fit_type == "Single Exponential":
-        st.write(X_fit, Y_fit)
         y0, N0, t0, tau = [0, first_peak, 0, 10]
         params = [y0, N0, t0, tau]
         popt, _ = curve_fit(exp_decay, X_fit, Y_fit, p0=params)
-        st.write(*popt)
         plt.plot(X_fit + start, exp_decay(X_fit, *popt), 'r--', label='Single Exp Fit: y0=%.3f, N0=%.3f, t0=%.3f, tau=%.3f' % tuple(popt))
 
         # Sidebar for single exponential fitting parameters
@@ -106,20 +104,22 @@ def plot_lifetime(file, device):
             # to be finished...
 
     elif fit_type == "Double Exponential":
-        # Sidebar for double exponential fitting parameters
-        st.sidebar.subheader("Double Exponential Fit Parameters")
-        y0 = st.sidebar.slider("y0", 0.0, 1000.0, 0.0)
-        N0_1 = st.sidebar.slider("N0_1", 0.0, 1000.0, float(max(y)))
-        t0_1 = st.sidebar.slider("t0_1", 0.0, float(max(x)), 0.0)
-        tau_1 = st.sidebar.slider("tau_1", 0.1, float(max(x)), 10.0)
-
-        N0_2 = st.sidebar.slider("N0_2", 0.0, 1000.0, float(max(y))/2)
-        t0_2 = st.sidebar.slider("t0_2", 0.0, float(max(x)), 0.0)
-        tau_2 = st.sidebar.slider("tau_2", 0.1, float(max(x)), 10.0)
-
+        y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2, = [0, first_peak, 0, 10, first_peak, 0, 10]
         params = [y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2]
         popt, _ = curve_fit(double_exp_decay, X_fit, Y_fit, p0=params)
-        plt.plot(X_fit, double_exp_decay(X_fit, *popt), 'r--', label='Double Exp Fit: y0=%.3f, N0_1=%.3f, t0_1=%.3f, tau_1=%.3f, N0_2=%.3f, t0_2=%.3f, tau_2=%.3f' % tuple(popt))
+        plt.plot(X_fit + start, double_exp_decay(X_fit, *popt), 'r--', label='Double Exp Fit: y0=%.3f, N0_1=%.3f, t0_1=%.3f, tau_1=%.3f, N0_2=%.3f, t0_2=%.3f, tau_2=%.3f' % tuple(popt))
+
+        # Sidebar for double exponential fitting parameters
+        if show_fit_params:
+            st.sidebar.subheader("Double Exponential Fit Parameters")
+            y0 = st.sidebar.slider("y0", 0.0, 1000.0, 0.0)
+            N0_1 = st.sidebar.slider("N0_1", 0.0, 1000.0, float(max(y)))
+            t0_1 = st.sidebar.slider("t0_1", 0.0, float(max(x)), 0.0)
+            tau_1 = st.sidebar.slider("tau_1", 0.1, float(max(x)), 10.0)
+
+            N0_2 = st.sidebar.slider("N0_2", 0.0, 1000.0, float(max(y)) / 2)
+            t0_2 = st.sidebar.slider("t0_2", 0.0, float(max(x)), 0.0)
+            tau_2 = st.sidebar.slider("tau_2", 0.1, float(max(x)), 10.0)
 
     """
     if fit_type != "None":
