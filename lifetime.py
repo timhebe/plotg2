@@ -5,10 +5,24 @@ import io
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.signal import find_peaks
+from lmfit import Model, Parameters
 
 # Define single exponential decay function
 def exp_decay(x, y0, N0, t0, tau):
     return y0 + N0 * np.exp(-(x - t0)/tau)
+
+def fit_exp_decay(data_fit, X_fit): # for trions (not implemented)
+    mod = Model(exp_decay)
+
+    # Initial parameter
+    pars = Parameters()
+    pars.add('y0', value=1)
+    pars.add('N0', value=max(X_fit))
+    pars.add('t0', value=0, min=0)
+    pars.add('tau', value=7)
+
+    result = mod.fit(data_fit, pars, x=X_fit)
+    return result
 
 # Define double exponential decay function
 def double_exp_decay(x, y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2):
@@ -47,10 +61,10 @@ def plot_lifetime(file, device):
     peaks = np.delete(peaks, to_delete)
 
     first_peak = peaks[0]
-    start = first_peak * 0.004 + 0.050
-    stop = first_peak * 0.004 + 1
-    data_fit = y[int(start / 0.004):int(stop / 0.004)]
-    X_fit = 0.004 * np.arange(0, len(data_fit))
+    start = first_peak + 0.050
+    stop = first_peak + 1
+    data_fit = y[int(start):int(stop)]
+    X_fit = np.arange(0, len(data_fit))
 
     plt.figure()
     plt.plot(x, y, label="Data")
@@ -104,8 +118,18 @@ def plot_lifetime(file, device):
                 y0, N0, t0, tau = 0.0, max(y), 0.0, 10.0
 
             params = [y0, N0, t0, tau]
-            popt, _ = curve_fit(exp_decay, X_fit, data_fit, p0=params)
-            plt.plot(X_fit + start, exp_decay(X_fit, *popt), 'r--', label='Single Exp Fit')
+
+            fit = fit_exp_decay(data_fit, X_fit)
+
+            # gets the y value of the fit
+            Y_fit = fit.best_fit
+            # Lifetime
+            tau = fit.params['tau'].value
+
+            plt.plot(X_fit + start, Y_fit, 'r--', label='Single Exp Fit')
+
+            # popt, _ = curve_fit(exp_decay, X_fit, data_fit, p0=params)
+            # plt.plot(X_fit + start, exp_decay(X_fit, *popt), 'r--', label='Single Exp Fit')
 
         elif fit_type == "Double Exponential":
             if show_fit_params:
@@ -123,7 +147,7 @@ def plot_lifetime(file, device):
             popt, _ = curve_fit(double_exp_decay, X_fit, data_fit, p0=params)
             plt.plot(X_fit + start, double_exp_decay(X_fit, *popt), 'r--', label='Double Exp Fit')
 
-    plt.plot(peaks * 0.004, data_pk, 'o', label="Peaks")
+    plt.plot(peaks, data_pk, 'o', label="Peaks")
     plt.legend()
     plt.grid(True)
     st.pyplot(plt)
