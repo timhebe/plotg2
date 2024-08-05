@@ -21,7 +21,6 @@ def plot_lifetime(file, device):
     log_scale = st.sidebar.radio("Y-axis scale", ("Linear", "Log")) == "Log"
     fit_type = st.sidebar.selectbox("Fit Type", ["None", "Single Exponential", "Double Exponential"])
     # show_fit_params = st.sidebar.checkbox("Show Fit Parameters", value=False)
-    show_fit_results = st.sidebar.checkbox("Show Fit Results", False)
 
     if isinstance(file, str):  # Demo mode
         name = file.split('/')[-1].split('.')[0]
@@ -76,6 +75,8 @@ def plot_lifetime(file, device):
         plt.plot(x_pk, data_pk, 'o', label="Peaks")
         plt.axvline(start, linestyle="--", color="seagreen")
         plt.axvline(stop, linestyle="--", color="firebrick")
+
+        show_fit_results = st.sidebar.checkbox("Show Fit Results", False)
 
         if fit_type == "Single Exponential":
             y0, N0, t0, tau = [0, first_peak, 0, 10]
