@@ -104,7 +104,7 @@ def plot_lifetime(file, device):
             # to be finished...
 
     elif fit_type == "Double Exponential":
-        y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2, = [0, first_peak, 0, 10, first_peak, 0, 10]
+        y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2, = [0, first_peak, 0, 10, first_peak/2, 0, 10]
         params = [y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2]
         popt, _ = curve_fit(double_exp_decay, X_fit, Y_fit, p0=params)
         plt.plot(X_fit + start, double_exp_decay(X_fit, *popt), 'r--', label='Double Exp Fit: y0=%.3f, N0_1=%.3f, t0_1=%.3f, tau_1=%.3f, N0_2=%.3f, t0_2=%.3f, tau_2=%.3f' % tuple(popt))
@@ -163,8 +163,7 @@ def plot_lifetime(file, device):
             plt.plot(X_fit + start, double_exp_decay(X_fit, *popt), 'r--', label='Double Exp Fit')
     """
 
-    # plt.plot(peaks, data_pk, 'o', label="Peaks")
-    plt.legend()
+    # plt.legend()
     plt.grid(True)
     st.pyplot(plt)
 
