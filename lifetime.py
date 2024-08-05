@@ -62,8 +62,12 @@ def plot_lifetime(file, device):
     x_pk = np.delete(x_pk, to_delete)
 
     first_peak = x_pk[0]  # in ns
-    start = first_peak + 1
-    stop = first_peak + 151 # 150 ns interval
+
+    # Start and stop in [ns]
+    # We will fit between start and stop only. These parameters influence the fit a lot.
+    # Start at the first peak + 1 ns, stop 150 ns later.
+    start = st.sidebar.number_input('Start (in ns)', 0.0, float(max(y)), first_peak + 1)
+    stop = st.sidebar.number_input('Stop (in ns)', 0.0, float(max(y)), first_peak + 151)
     Y_fit = y[int(start):int(stop)]
     X_fit = np.arange(0, len(Y_fit))
 
