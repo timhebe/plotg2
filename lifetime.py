@@ -87,7 +87,7 @@ def plot_lifetime(file, device):
 
         params = [y0, N0, t0, tau]
         popt, _ = curve_fit(exp_decay, X_fit, Y_fit, p0=params)
-        plt.plot(x, exp_decay(x, *popt), 'r--', label='Single Exp Fit: y0=%.3f, N0=%.3f, t0=%.3f, tau=%.3f' % tuple(popt))
+        plt.plot(X_fit, exp_decay(X_fit, *popt), 'r--', label='Single Exp Fit: y0=%.3f, N0=%.3f, t0=%.3f, tau=%.3f' % tuple(popt))
 
     elif fit_type == "Double Exponential":
         # Sidebar for double exponential fitting parameters
@@ -103,7 +103,7 @@ def plot_lifetime(file, device):
 
         params = [y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2]
         popt, _ = curve_fit(double_exp_decay, X_fit, Y_fit, p0=params)
-        plt.plot(x, double_exp_decay(x, *popt), 'r--', label='Double Exp Fit: y0=%.3f, N0_1=%.3f, t0_1=%.3f, tau_1=%.3f, N0_2=%.3f, t0_2=%.3f, tau_2=%.3f' % tuple(popt))
+        plt.plot(X_fit, double_exp_decay(X_fit, *popt), 'r--', label='Double Exp Fit: y0=%.3f, N0_1=%.3f, t0_1=%.3f, tau_1=%.3f, N0_2=%.3f, t0_2=%.3f, tau_2=%.3f' % tuple(popt))
 
     """
     if fit_type != "None":
