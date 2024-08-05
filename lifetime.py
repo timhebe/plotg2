@@ -57,15 +57,13 @@ def plot_lifetime(file, device):
     x_pk = x[peaks]
     data_pk = y[peaks]
 
-    st.write(x_pk, data_pk)
-
     to_delete = np.where(data_pk < max(data_pk) / 100)
     data_pk = np.delete(data_pk, to_delete)
-    peaks = np.delete(peaks, to_delete)
+    x_pk = np.delete(x_pk, to_delete)
 
-    first_peak = peaks[0]
-    start = first_peak + 0.050
-    stop = first_peak + 1
+    first_peak = x_pk[0]  # in ns
+    start = first_peak + 1
+    stop = first_peak + 151 # 150 ns interval
     data_fit = y[int(start):int(stop)]
     X_fit = np.arange(0, len(data_fit))
 
