@@ -85,11 +85,11 @@ def plot_lifetime(file, device):
         plt.axvline(stop, linestyle="--", color="firebrick")
 
     if fit_type == "Single Exponential":
-
+        st.write(X_fit, Y_fit)
         y0, N0, t0, tau = [0, first_peak, 0, 10]
-
         params = [y0, N0, t0, tau]
         popt, _ = curve_fit(exp_decay, X_fit, Y_fit, p0=params)
+        st.write(*popt)
         plt.plot(X_fit + start, exp_decay(X_fit, *popt), 'r--', label='Single Exp Fit: y0=%.3f, N0=%.3f, t0=%.3f, tau=%.3f' % tuple(popt))
 
         # Sidebar for single exponential fitting parameters
