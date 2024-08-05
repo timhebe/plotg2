@@ -52,6 +52,7 @@ def plot_lifetime(file, device):
         x = data["Time_ns"]
         y = data["Counts_per_bin"]
 
+    """
     # Peak finding
     peaks, properties = find_peaks(y, prominence=np.max(y) / 2)
     data_pk = y[peaks]
@@ -65,6 +66,7 @@ def plot_lifetime(file, device):
     stop = first_peak + 1
     data_fit = y[int(start):int(stop)]
     X_fit = np.arange(0, len(data_fit))
+    """
 
     plt.figure()
     plt.plot(x, y, label="Data")
@@ -74,14 +76,13 @@ def plot_lifetime(file, device):
     if log_scale:
         plt.yscale('log')
 
-    """
     if fit_type == "Single Exponential":
         # Sidebar for single exponential fitting parameters
         st.sidebar.subheader("Single Exponential Fit Parameters")
         y0 = st.sidebar.slider("y0", 0.0, 1000.0, 0.0)
-        N0 = st.sidebar.slider("N0", 0.0, 1000.0, max(y))
-        t0 = st.sidebar.slider("t0", 0.0, max(x), 0.0)
-        tau = st.sidebar.slider("tau", 0.1, max(x), 10.0)
+        N0 = st.sidebar.slider("N0", 0.0, 1000.0, float(max(y)))
+        t0 = st.sidebar.slider("t0", 0.0, float(max(x)), 0.0)
+        tau = st.sidebar.slider("tau", 0.1, float(max(x)), 10.0)
 
         params = [y0, N0, t0, tau]
         popt, _ = curve_fit(exp_decay, x, y, p0=params)
@@ -91,19 +92,19 @@ def plot_lifetime(file, device):
         # Sidebar for double exponential fitting parameters
         st.sidebar.subheader("Double Exponential Fit Parameters")
         y0 = st.sidebar.slider("y0", 0.0, 1000.0, 0.0)
-        N0_1 = st.sidebar.slider("N0_1", 0.0, 1000.0, max(y))
-        t0_1 = st.sidebar.slider("t0_1", 0.0, max(x), 0.0)
-        tau_1 = st.sidebar.slider("tau_1", 0.1, max(x), 10.0)
+        N0_1 = st.sidebar.slider("N0_1", 0.0, 1000.0, float(max(y)))
+        t0_1 = st.sidebar.slider("t0_1", 0.0, float(max(x)), 0.0)
+        tau_1 = st.sidebar.slider("tau_1", 0.1, float(max(x)), 10.0)
 
-        N0_2 = st.sidebar.slider("N0_2", 0.0, 1000.0, max(y)/2)
-        t0_2 = st.sidebar.slider("t0_2", 0.0, max(x), 0.0)
-        tau_2 = st.sidebar.slider("tau_2", 0.1, max(x), 10.0)
+        N0_2 = st.sidebar.slider("N0_2", 0.0, 1000.0, float(max(y))/2)
+        t0_2 = st.sidebar.slider("t0_2", 0.0, float(max(x)), 0.0)
+        tau_2 = st.sidebar.slider("tau_2", 0.1, float(max(x)), 10.0)
 
         params = [y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2]
         popt, _ = curve_fit(double_exp_decay, x, y, p0=params)
         plt.plot(x, double_exp_decay(x, *popt), 'r--', label='Double Exp Fit: y0=%.3f, N0_1=%.3f, t0_1=%.3f, tau_1=%.3f, N0_2=%.3f, t0_2=%.3f, tau_2=%.3f' % tuple(popt))
-    """
 
+    """
     if fit_type != "None":
         if show_fit_params:
             st.sidebar.subheader(f"{fit_type} Fit Parameters")
@@ -117,19 +118,16 @@ def plot_lifetime(file, device):
             else:
                 y0, N0, t0, tau = 0.0, max(y), 0.0, 10.0
 
-            params = [y0, N0, t0, tau]
-
-            fit = fit_exp_decay(data_fit, X_fit)
-
+            # params = [y0, N0, t0, tau]
+            # fit = fit_exp_decay(data_fit, X_fit)
             # gets the y value of the fit
-            Y_fit = fit.best_fit
+            # Y_fit = fit.best_fit
             # Lifetime
             tau = fit.params['tau'].value
-
             plt.plot(X_fit + start, Y_fit, 'r--', label='Single Exp Fit')
 
-            # popt, _ = curve_fit(exp_decay, X_fit, data_fit, p0=params)
-            # plt.plot(X_fit + start, exp_decay(X_fit, *popt), 'r--', label='Single Exp Fit')
+            popt, _ = curve_fit(exp_decay, X_fit, data_fit, p0=params)
+            plt.plot(X_fit + start, exp_decay(X_fit, *popt), 'r--', label='Single Exp Fit')
 
         elif fit_type == "Double Exponential":
             if show_fit_params:
@@ -146,8 +144,9 @@ def plot_lifetime(file, device):
             params = [y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2]
             popt, _ = curve_fit(double_exp_decay, X_fit, data_fit, p0=params)
             plt.plot(X_fit + start, double_exp_decay(X_fit, *popt), 'r--', label='Double Exp Fit')
+    """
 
-    plt.plot(peaks, data_pk, 'o', label="Peaks")
+    # plt.plot(peaks, data_pk, 'o', label="Peaks")
     plt.legend()
     plt.grid(True)
     st.pyplot(plt)
