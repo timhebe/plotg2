@@ -46,9 +46,8 @@ def fit_g2(x, y, model, initial_guess):
 
 
 def plot_g2(file, device):
-    global g2_t0, initial_guess
+    global g2_t0, initial_guess, y, x
     with st.sidebar:
-        moleculeTitle = st.text_input("Molecule Title", value="")
         model = st.selectbox("Select Fit Model", ["Grandi et al.", "Carmichael et al.", "Zirkelbach et al."])
         initial_x0 = st.number_input("Initial x0 value", value=0)
         printInfo = st.checkbox("Print fitting info", value=False)
@@ -98,10 +97,16 @@ def plot_g2(file, device):
 
     plt.figure()
     plt.plot(x, y, label="Data")
-    plt.plot(x, function_grandi(x, *popt), label=f"Fit ({model})", linestyle='--')
-    plt.xlabel("Time differences (ns)")
+    if model == "Grandi et al.":
+        plt.plot(x, function_grandi(x, *popt), label=f"Fit ({model})", linestyle='--')
+    elif model == "Carmichael et al.":
+        plt.plot(x, function_carmichael(x, *popt), label=f"Fit ({model})", linestyle='--')
+    elif model == "Zirkelbach et al.":
+        plt.plot(x, function_zirkelbach(x, *popt), label=f"Fit ({model})", linestyle='--')
+    plt.xlabel(r"Time $\tau$ (ns)")
     plt.ylabel("Counts per bin" if device == "Swabian Instruments" else r"$g^{(2)} (\tau)$")
-    plt.title(f"g2 Measurement ({device})")
+    plt.title(rf"$g^[(2)]$ Measurement ({device})")
+    plt.ylim(0, None)
     plt.legend()
     plt.grid(True)
     plt.text(0.05, 0.25, textstr, transform=plt.gca().transAxes, verticalalignment='top')
