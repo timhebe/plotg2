@@ -54,9 +54,16 @@ def plot_g2(file, device):
         printInfo = st.checkbox("Print fitting info", value=False)
 
     data = read_data(file, device)
-    x = data["Time differences (ns)" if device == "Swabian Instruments" else "Time[ns]"]
-    y = data["Counts per bin" if device == "Swabian Instruments" else "G(t)[]"]
-    initial_y0, initial_a = min(y), max(y) - min(y)
+    if device == "Swabian Instruments":
+        data['Time differences (ns)'] = data['Time differences (ps)'] / 1000
+        x = data["Time differences (ns)"]
+        y = data["Counts per bin"]
+    elif device == "PicoQuant":
+        x = data["Time[ns]"]
+        y = data["G(t)[]"]
+
+    initial_y0 = min(y)
+    initial_a = max(y) - initial_y0
     initial_guesses = {
         "Grandi et al.": [0.4, 0.1, initial_y0, initial_x0, initial_a],
         "Carmichael et al.": [initial_a, initial_y0, 0.1, initial_x0],
