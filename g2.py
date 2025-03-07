@@ -70,8 +70,12 @@ def plot_g2(file, device):
         "Zirkelbach et al.": [initial_a, initial_y0, 0.1, initial_x0, 1]
     }
     params, errors, r_squared, chi_sq_red, param_names = fit_g2(x, y, model, initial_guesses[model])
-    g2_0 = g2_grandi(params[3], *params[:5]) / (params[2] + params[-1]) if model == "Grandi et al." else g2_carmichael(
-        params[3], *params) / (params[1] + params[0])
+    if model == "Grandi et al.":
+        g2_0 = g2_grandi(params[3], *params[:5]) / (params[2] + params[-1])
+    elif model == "Carmichael et al.":
+        g2_0 = g2_carmichael(params[3], *params) / (params[1] + params[0])
+    elif model == "Zirkelbach et al.":
+        g2_0 = g2_carmichael(params[3], *params) / (params[1] + params[0])
     textstr = rf'$g^{{(2)}} (\tau = 0) = {round(g2_0 * 100, 1)}\%$'
 
     if printInfo:
@@ -107,8 +111,7 @@ def plot_g2(file, device):
     }
     st.markdown(links[model])
     formulas = {
-        "Grandi et al.": r"$g^{(2)}(\tau) = 1 - e^{-\frac{p}{2} \tau} \left[ \cos \left( \frac{q}{2} \tau \right) + "
-                         r"\frac{p}{q} \sin \left( \frac{q}{2} \tau \right) \right]$",
+        "Grandi et al.": r"$g^{(2)}(\tau) = 1 - e^{-\frac{p}{2} \tau} \left[ \cos \left( \frac{q}{2} \tau \right) + \frac{p}{q} \sin \left( \frac{q}{2} \tau \right) \right]$",
         "Carmichael et al.": r"$g^{(2)}(\tau) = \left( 1 - e^{-\frac{1}{2} \Gamma_1 \tau} \right)^2$",
         "Zirkelbach et al.": r"$g^{(2)}_{01}(\tau) = 1 - e^{- \Gamma_1 (1+S) |\tau|}$"
     }
