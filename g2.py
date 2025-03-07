@@ -75,7 +75,7 @@ def plot_g2(file, device):
     elif model == "Carmichael et al.":
         g2_0 = g2_carmichael(params[3], *params) / (params[1] + params[0])
     elif model == "Zirkelbach et al.":
-        g2_0 = g2_carmichael(params[3], *params) / (params[1] + params[0])
+        g2_0 = g2_zirkelbach(params[3], *params) / (params[1] + params[0])
     textstr = rf'$g^{{(2)}} (\tau = 0) = {round(g2_0 * 100, 1)}\%$'
 
     if printInfo:
