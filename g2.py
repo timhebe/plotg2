@@ -21,8 +21,10 @@ def g2_zirkelbach(x, a, y0, gamma, x0, S):
 
 
 def read_data(file, device):
-    data = pd.read_csv(file, delimiter='\t', header=0 if device == "Swabian Instruments" else 1)
-    if device == "PicoQuant":
+    if device == "Swabian Instruments":
+        data = pd.read_csv(file, delimiter='\t', header=0)
+    elif device == "PicoQuant":
+        data = pd.read_csv(file, delimiter='\t', skiprows=1)
         data.columns = ['Time[ns]', 'G(t)[]']
     return data
 
