@@ -111,13 +111,13 @@ def plot_g2(file, device):
 
     buf = io.BytesIO()
     plt.savefig(buf, format="pdf")
-    if file == "example_data/example g2 Swabian.txt" or file == "example_data/example g2 PicoQuant.dat"
+    if file == "example_data/example g2 Swabian.txt" or file == "example_data/example g2 PicoQuant.dat":
         st.download_button("Download as PDF", buf.getvalue(), file_name="example g2.pdf")
     else:
         st.download_button("Download as PDF", buf.getvalue(), file_name=f"{file.name.split('.')[0]}.pdf")
     buf.seek(0)
     plt.savefig(buf, format="png")
-    if file == "example_data/example g2 Swabian.txt" or file == "example_data/example g2 PicoQuant.dat"
+    if file == "example_data/example g2 Swabian.txt" or file == "example_data/example g2 PicoQuant.dat":
         st.download_button("Download as PNG", buf.getvalue(), file_name="example g2.png")
     else:
         st.download_button("Download as PNG", buf.getvalue(), file_name=f"{file.name.split('.')[0]}.png")
