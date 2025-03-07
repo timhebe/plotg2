@@ -114,4 +114,4 @@ def plot_g2(file, device):
         "Carmichael et al.": r"$g^{(2)}(\tau) = \left( 1 - e^{-\frac{1}{2} \Gamma_1 \tau} \right)^2$",
         "Zirkelbach et al.": r"$g^{(2)}_{01}(\tau) = 1 - e^{- \Gamma_1 (1+S) |\tau|}$"
     }
-    st.latex(formulas[model])
+    st.write(formulas[model])
