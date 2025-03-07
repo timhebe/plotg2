@@ -78,6 +78,20 @@ def plot_g2(file, device):
     textstr = rf'$g^{{(2)}} (\tau = 0) = {round(g2_0 * 100, 1)}\%$'
 
     if printInfo:
+        st.markdown("**More Information:**")
+        links = {
+            "Grandi et al.": "[Grandi et al. Publication](https://doi.org/10.1103/PhysRevA.94.063839)",
+            "Carmichael et al.": "[Carmichael et al. Publication](https://doi.org/10.1088/0022-3700/9/8/007)",
+            "Zirkelbach et al.": "[Zirkelbach et al. Publication](https://doi.org/10.1103/PhysRevLett.125.103603)"
+        }
+        st.markdown(links[model])
+        formulas = {
+            "Grandi et al.": r"$g^{(2)}(\tau) = 1 - e^{-\frac{p}{2} \tau} \left[ \cos \left( \frac{q}{2} \tau \right) + \frac{p}{q} \sin \left( \frac{q}{2} \tau \right) \right]$",
+            "Carmichael et al.": r"$g^{(2)}(\tau) = \left( 1 - e^{-\frac{1}{2} \Gamma_1 \tau} \right)^2$",
+            "Zirkelbach et al.": r"$g^{(2)}_{01}(\tau) = 1 - e^{- \Gamma_1 (1+S) |\tau|}$"
+        }
+        st.write(formulas[model])
+
         st.write(f"**{model} Fit Report**")
         for name, value, error in zip(param_names, params, errors):
             st.write(f"{name} = {value:.6f} ± {error:.6f}")
@@ -97,21 +111,13 @@ def plot_g2(file, device):
 
     buf = io.BytesIO()
     plt.savefig(buf, format="pdf")
-    st.download_button("Download as PDF", buf.getvalue(), file_name=f"{file.name.split('.')[0]}.pdf")
+    if file == "example_data/example g2 Swabian.txt" or file == "example_data/example g2 PicoQuant.dat"
+        st.download_button("Download as PDF", buf.getvalue(), file_name="example g2.pdf")
+    else:
+        st.download_button("Download as PDF", buf.getvalue(), file_name=f"{file.name.split('.')[0]}.pdf")
     buf.seek(0)
     plt.savefig(buf, format="png")
-    st.download_button("Download as PNG", buf.getvalue(), file_name=f"{file.name.split('.')[0]}.png")
-
-    st.markdown("**More Information:**")
-    links = {
-        "Grandi et al.": "[Grandi et al. Publication](https://doi.org/10.1103/PhysRevA.94.063839)",
-        "Carmichael et al.": "[Carmichael et al. Publication](https://doi.org/10.1088/0022-3700/9/8/007)",
-        "Zirkelbach et al.": "[Zirkelbach et al. Publication](https://doi.org/10.1103/PhysRevLett.125.103603)"
-    }
-    st.markdown(links[model])
-    formulas = {
-        "Grandi et al.": r"$g^{(2)}(\tau) = 1 - e^{-\frac{p}{2} \tau} \left[ \cos \left( \frac{q}{2} \tau \right) + \frac{p}{q} \sin \left( \frac{q}{2} \tau \right) \right]$",
-        "Carmichael et al.": r"$g^{(2)}(\tau) = \left( 1 - e^{-\frac{1}{2} \Gamma_1 \tau} \right)^2$",
-        "Zirkelbach et al.": r"$g^{(2)}_{01}(\tau) = 1 - e^{- \Gamma_1 (1+S) |\tau|}$"
-    }
-    st.write(formulas[model])
+    if file == "example_data/example g2 Swabian.txt" or file == "example_data/example g2 PicoQuant.dat"
+        st.download_button("Download as PNG", buf.getvalue(), file_name="example g2.png")
+    else:
+        st.download_button("Download as PNG", buf.getvalue(), file_name=f"{file.name.split('.')[0]}.png")
