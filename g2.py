@@ -88,7 +88,7 @@ def plot_g2(file, device):
         formulas = {
             "Grandi et al.": r"$g^{(2)}(\tau) = 1 - e^{-\frac{p}{2} \tau} \left[ \cos \left( \frac{q}{2} \tau \right) + \frac{p}{q} \sin \left( \frac{q}{2} \tau \right) \right]$",
             "Carmichael et al.": r"$g^{(2)}(\tau) = \left( 1 - e^{-\frac{1}{2} \Gamma_1 \tau} \right)^2$",
-            "Zirkelbach et al.": r"$g^{(2)}_{01}(\tau) = 1 - e^{- \Gamma_1 (1+S) |\tau|}$"
+            "Zirkelbach et al.": r"$g^{(2)}(\tau) = 1 - e^{- \Gamma_1 (1+S) |\tau|}$"
         }
         st.write(formulas[model])
 
