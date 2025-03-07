@@ -42,7 +42,7 @@ def main():
                               "Lifetime", "Spectrum", "CAM"])
 
     device_type = ""
-    if plot_type in ["Count Rate", r"$g^{(2)}$", "Lifetime"]:
+    if plot_type in ["Count Rate", "g²(τ)", "Lifetime"]:
         device_type = st.selectbox("Select the device", ["Swabian Instruments", "PicoQuant"])
     elif plot_type == "Spectrum":
         device_type = st.selectbox("Select the device", ["Princeton Instruments", "Andor, Oxford Instruments"])
@@ -57,7 +57,7 @@ def main():
                 uploaded_file = "example_data/example count rate Swabian.txt"
             else:
                 st.write("No demo data available for PicoQuant. Choose Swabian Instruments device or another plot.")
-        elif plot_type == r"$g^{(2)}$":
+        elif plot_type == "g²(τ)":
             if device_type == "Swabian Instruments":
                 uploaded_file = "example_data/example g2 Swabian.txt"
             else:
@@ -80,7 +80,7 @@ def main():
     if plot_type and uploaded_file:
         if plot_type == "Count Rate":
             plot_count_rate(uploaded_file, device_type)
-        elif plot_type == r"$g^{(2)}$":
+        elif plot_type == "g²(τ)":
             plot_g2(uploaded_file, device_type)
         elif plot_type == "Lifetime":
             plot_lifetime(uploaded_file, device_type)
