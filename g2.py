@@ -5,11 +5,24 @@ import numpy as np
 from scipy.optimize import curve_fit
 import io
 
-def g2_function(x, p, q, y0, x0, a):
-    return y0 + a * (1 - np.exp(-0.5 * p * np.abs(x-x0)) * (np.cos(0.5 * q * np.abs(x-x0)) + p/q * np.sin(0.5 * q * np.abs(x-x0))))
+
+# https://doi.org/10.1103/PhysRevA.94.063839
+def function_grandi(x, p, q, y0, x0, a):
+    return y0 + a * (1 - np.exp(-0.5 * p * np.abs(x - x0)) * (
+                np.cos(0.5 * q * np.abs(x - x0)) + p / q * np.sin(0.5 * q * np.abs(x - x0))))
+
+
+# https://doi.org/10.1088/0022-3700/9/8/007
+def function_carmichael(x, a, y0, gamma, x0):
+    return y0 + a * (1 - np.exp(-0.5 * np.abs(x - x0) * gamma)) ** 2
+
+
+# https://doi.org/10.1103/PhysRevLett.125.103603
+def function_zirkelbach(x, a, y0, gamma, x0, S):
+    return y0 + a * (1 - np.exp(-gamma * (1 + S) * np.abs(x - x0)))
+
 
 def read_data(file, device):
-    global data
     if device == "Swabian Instruments":
         data = pd.read_csv(file, delimiter='\t', header=0)
     elif device == "PicoQuant":
@@ -17,21 +30,30 @@ def read_data(file, device):
         data.columns = ['Time[ns]', 'G(t)[]']
     return data
 
+
+def fit_g2(x, y, model, initial_guess):
+    if model == "Grandi et al.":
+        fit_function = function_grandi
+    elif model == "Carmichael et al.":
+        fit_function = function_carmichael
+    elif model == "Zirkelbach et al.":
+        fit_function = function_zirkelbach
+    else:
+        raise ValueError("Invalid model selected.")
+
+    popt, _ = curve_fit(fit_function, x, y, p0=initial_guess)
+    return popt
+
+
 def plot_g2(file, device):
+    global g2_t0, initial_guess
     with st.sidebar:
         moleculeTitle = st.text_input("Molecule Title", value="")
-        initial_p = st.number_input("Initial p value", value=0.4)
-        initial_q = st.number_input("Initial q value", value=0.1)
+        model = st.selectbox("Select Fit Model", ["Grandi et al.", "Carmichael et al.", "Zirkelbach et al."])
         initial_x0 = st.number_input("Initial x0 value", value=0)
         printInfo = st.checkbox("Print fitting info", value=False)
 
-    if isinstance(file, str):  # Demo mode
-        name = file.split('/')[-1].split('.')[0]
-        data = read_data(file, device)
-    else:
-        name = file.name.split('.')[0]
-        data = read_data(file, device)
-
+    data = read_data(file, device)
     if device == "Swabian Instruments":
         data['Time differences (ns)'] = data['Time differences (ps)'] / 1000
         x = data["Time differences (ns)"]
@@ -42,25 +64,43 @@ def plot_g2(file, device):
 
     initial_y0 = min(y)
     initial_a = max(y) - initial_y0
-    initial_guess = (initial_p, initial_q, initial_y0, initial_x0, initial_a)
-    popt, _ = curve_fit(g2_function, x, y, p0=initial_guess)
-    y0 = popt[2]
-    a = popt[4]
-    g_2_0 = g2_function(0, *popt) / (y0 + a)
-    textstr = r'$g^{(2)} (\tau = 0) = $' + str(round(g_2_0 * 100, 1)) + '%'
+
+    if model == "Grandi et al.":
+        initial_guess = (0.4, 0.1, initial_y0, initial_x0, initial_a)
+    elif model == "Carmichael et al.":
+        initial_guess = (initial_a, initial_y0, 0.1, initial_x0)
+    elif model == "Zirkelbach et al.":
+        initial_guess = (initial_a, initial_y0, 0.1, initial_x0, 1)
+
+    popt = fit_g2(x, y, model, initial_guess)
+
+    if model == "Grandi et al.":
+        x0 = popt[3]
+        y0 = popt[2]
+        a = popt[4]
+        g2_t0 = function_grandi(x0, *popt) / (y0 + a)
+    elif model == "Carmichael et al.":
+        x0 = popt[3]
+        y0 = popt[1]
+        a = popt[0]
+        g2_t0 = function_carmichael(x0, *popt) / (y0 + a)
+    elif model == "Zirkelbach et al.":
+        x0 = popt[3]
+        y0 = popt[1]
+        a = popt[0]
+        g2_t0 = function_zirkelbach(x0, *popt) / (y0 + a)
+
+    textstr = rf'$g^{{(2)}} (\tau = 0) = {round(g2_t0 * 100, 1)}\%$'
 
     if printInfo:
-        st.write("Optimal parameters (p, q, y0, x0, a): ", popt)
-        st.write(r'$g^{(2)} (\tau = 0) = $' + str(round(g_2_0 * 100, 1)) + '%')
+        st.write(f"Optimal parameters for {model}: ", popt)
+        st.write(textstr)
 
     plt.figure()
     plt.plot(x, y, label="Data")
-    plt.plot(x, g2_function(x, *popt), label="Fit", linestyle='--')
+    plt.plot(x, function_grandi(x, *popt), label=f"Fit ({model})", linestyle='--')
     plt.xlabel("Time differences (ns)")
-    if device == "Swabian Instruments":
-        plt.ylabel("Counts per bin")
-    elif device == "PicoQuant":
-        plt.ylabel(r"g^{(2)} (\tau)$")
+    plt.ylabel("Counts per bin" if device == "Swabian Instruments" else r"$g^{(2)} (\tau)$")
     plt.title(f"g2 Measurement ({device})")
     plt.legend()
     plt.grid(True)
@@ -69,7 +109,7 @@ def plot_g2(file, device):
 
     buf = io.BytesIO()
     plt.savefig(buf, format="pdf")
-    st.download_button("Download as PDF", buf.getvalue(), file_name=f"{name}.pdf")
+    st.download_button("Download as PDF", buf.getvalue(), file_name=f"{file.name.split('.')[0]}.pdf")
     buf.seek(0)
     plt.savefig(buf, format="png")
-    st.download_button("Download as PNG", buf.getvalue(), file_name=f"{name}.png")
+    st.download_button("Download as PNG", buf.getvalue(), file_name=f"{file.name.split('.')[0]}.png")
