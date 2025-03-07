@@ -48,7 +48,6 @@ def fit_g2(x, y, model, initial_guess):
 
 def plot_g2(file, device):
     with st.sidebar:
-        moleculeTitle = st.text_input("Molecule Title", value="")
         model = st.selectbox("Choose Fit Model", ["Grandi et al.", "Carmichael et al.", "Zirkelbach et al."])
         initial_x0 = st.number_input("Initial x0", value=0.0)
         printInfo = st.checkbox("Print fitting info", value=False)
