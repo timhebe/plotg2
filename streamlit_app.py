@@ -5,6 +5,7 @@ from lifetime import plot_lifetime
 from spectrum import plot_spectrum
 from camera import plot_cam
 
+
 def add_footer():
     st.markdown(
         """
@@ -25,19 +26,23 @@ def add_footer():
         }
         </style>
         <div class="footer">
-            <p>Created by Tim Hebenstreit. For any questions, please contact me at: <a href="mailto:tim.hebenstreit@mpl.mpg.de">tim.hebenstreit@mpl.mpg.de</a></p>
+            <p>Created by Tim Hebenstreit. For any questions, please contact me at: 
+            <a href="mailto:tim.hebenstreit@mpl.mpg.de">tim.hebenstreit@mpl.mpg.de</a></p>
         </div>
         """,
         unsafe_allow_html=True
     )
 
+
 def main():
     st.title("Scientific Data Plotter")
 
-    plot_type = st.selectbox("Select the type of plot", ["Choose one from the list below...", "Count Rate", "g2", "Lifetime", "Spectrum", "CAM"])
+    plot_type = st.selectbox("Select the type of plot",
+                             ["Choose one from the list below...", "Count Rate", r"$g^{(2)}$",
+                              "Lifetime", "Spectrum", "CAM"])
 
     device_type = ""
-    if plot_type in ["Count Rate", "g2", "Lifetime"]:
+    if plot_type in ["Count Rate", r"$g^{(2)}$", "Lifetime"]:
         device_type = st.selectbox("Select the device", ["Swabian Instruments", "PicoQuant"])
     elif plot_type == "Spectrum":
         device_type = st.selectbox("Select the device", ["Princeton Instruments", "Andor, Oxford Instruments"])
@@ -52,7 +57,7 @@ def main():
                 uploaded_file = "example_data/example count rate Swabian.txt"
             else:
                 st.write("No demo data available for PicoQuant. Choose Swabian Instruments device or another plot.")
-        elif plot_type == "g2":
+        elif plot_type == r"$g^{(2)}$":
             if device_type == "Swabian Instruments":
                 uploaded_file = "example_data/example g2 Swabian.txt"
             else:
@@ -75,7 +80,7 @@ def main():
     if plot_type and uploaded_file:
         if plot_type == "Count Rate":
             plot_count_rate(uploaded_file, device_type)
-        elif plot_type == "g2":
+        elif plot_type == r"$g^{(2)}$":
             plot_g2(uploaded_file, device_type)
         elif plot_type == "Lifetime":
             plot_lifetime(uploaded_file, device_type)
@@ -85,6 +90,7 @@ def main():
             plot_cam(uploaded_file)
 
     add_footer()
+
 
 if __name__ == "__main__":
     main()
