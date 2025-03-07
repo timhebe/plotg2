@@ -38,7 +38,7 @@ def main():
     st.title("Scientific Data Plotter")
 
     plot_type = st.selectbox("Select the type of plot",
-                             ["Choose one from the list below...", "Count Rate", r"$g^{(2)}$",
+                             ["Choose one from the list below...", "Count Rate", "g²(τ)",
                               "Lifetime", "Spectrum", "CAM"])
 
     device_type = ""
