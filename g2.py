@@ -88,7 +88,7 @@ def plot_g2(file, device):
     plt.plot(x, eval(f"g2_{model.split()[0].lower()}(x, *params)"), label="Fit", linestyle='--')
     plt.xlabel("Time differences (ns)")
     plt.ylabel("Counts per bin" if device == "Swabian Instruments" else r"$g^{(2)} (\tau)$")
-    plt.title(rf"$g^[(2)]$ Measurement ({device})")
+    plt.title(r"$g^{(2)}$ " + f"Measurement ({device})")
     plt.ylim(0, None)
     plt.legend()
     plt.grid(True)
