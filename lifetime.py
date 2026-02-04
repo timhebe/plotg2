@@ -63,9 +63,13 @@ def plot_lifetime(file, device):
 
         # Start and stop in [ns]
         # We will fit between start and stop only. These parameters influence the fit a lot.
-        # Start at the first peak + 1 ns, stop 150 ns later.
-        start = st.sidebar.number_input('Start (in ns)', 0.0, float(max(y)), first_peak + 1)
-        stop = st.sidebar.number_input('Stop (in ns)', 0.0, float(max(y)), first_peak + 151)
+        # Start at the first peak + 1 ns, stop at a sensible default based on data range.
+        x_max = float(max(x))
+        default_start = min(first_peak + 1, x_max - 1)
+        default_stop = min(first_peak + 151, x_max)
+
+        start = st.sidebar.number_input('Start (in ns)', 0.0, x_max, default_start)
+        stop = st.sidebar.number_input('Stop (in ns)', 0.0, x_max, default_stop)
         # Convert start and stop times (in ns) to indices
         start_idx = np.searchsorted(x, start)
         stop_idx = np.searchsorted(x, stop)
@@ -78,13 +82,28 @@ def plot_lifetime(file, device):
 
         show_fit_results = st.sidebar.checkbox("Show Fit Results", False)
 
+        # Parameter name to LaTeX mapping
+        param_latex = {
+            'y0': r'y_0',
+            'N0': r'N_0',
+            't0': r't_0',
+            'tau': r'\tau',
+            'N0_1': r'N_{0,1}',
+            't0_1': r't_{0,1}',
+            'tau_1': r'\tau_1',
+            'N0_2': r'N_{0,2}',
+            't0_2': r't_{0,2}',
+            'tau_2': r'\tau_2',
+        }
+
         if fit_type == "Single Exponential":
             y0, N0, t0, tau = [0, first_peak, 0, 10]
             params = [y0, N0, t0, tau]
             param_names = ['y0', 'N0', 't0', 'tau']
-            popt, _ = curve_fit(exp_decay, X_fit, data_fit, p0=params)
+            popt, pcov = curve_fit(exp_decay, X_fit, data_fit, p0=params, maxfev=10000)
+            perr = np.sqrt(np.diag(pcov))
             Y_fit = exp_decay(X_fit, *popt)
-            formula = r"$y(x) = y_0 + N_0 \cdot \exp\left(\frac{-(x - t_0)}{\tau}\right)$"
+            formula = r"y(x) = y_0 + N_0 \cdot \exp\left(\frac{-(x - t_0)}{\tau}\right)"
 
             """
             # Sidebar for single exponential fitting parameters
@@ -101,9 +120,10 @@ def plot_lifetime(file, device):
             y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2, = [0, first_peak, 0, 10, first_peak / 2, 0, 10]
             params = [y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2]
             param_names = ['y0', 'N0_1', 't0_1', 'tau_1', 'N0_2', 't0_2', 'tau_2']
-            popt, _ = curve_fit(double_exp_decay, X_fit, data_fit, p0=params)
+            popt, pcov = curve_fit(double_exp_decay, X_fit, data_fit, p0=params, maxfev=10000)
+            perr = np.sqrt(np.diag(pcov))
             Y_fit = double_exp_decay(X_fit, *popt)
-            formula = r"$y(x) = y_0 + N_{0_1} \cdot \exp\left(\frac{-(x - t_{0_1})}{\tau_1}\right) + N_{0_2} \cdot \exp\left(\frac{-(x - t_{0_2})}{\tau_2}\right)$"
+            formula = r"y(x) = y_0 + N_{0,1} \cdot \exp\left(\frac{-(x - t_{0,1})}{\tau_1}\right) + N_{0,2} \cdot \exp\left(\frac{-(x - t_{0,2})}{\tau_2}\right)"
 
             """
             # Sidebar for double exponential fitting parameters
@@ -122,11 +142,12 @@ def plot_lifetime(file, device):
         plt.plot(X_fit + start, Y_fit, 'r--', label=f'{fit_type} Fit')
 
         if show_fit_results:
-            st.markdown(f"### Fitting Formula")
-            st.markdown(f"${formula}$")
+            st.markdown("### Fitting Formula")
+            st.latex(formula)
             st.markdown("### Fitting Parameters")
-            for name, param in zip(param_names, popt):
-                st.write(f"{name}: {param:.3f}")
+            for name, param, err in zip(param_names, popt, perr):
+                latex_name = param_latex.get(name, name)
+                st.latex(rf"{latex_name} = {param:.3f} \pm {err:.3f}")
 
     plt.legend()
     plt.grid(True)
