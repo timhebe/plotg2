@@ -41,11 +41,19 @@ def plot_lifetime(file, device):
         x = data["Time_ns"]
         y = data["Counts_per_bin"]
 
+    # X-axis limits
+    st.sidebar.markdown("### X-axis limits")
+    x_min_default = float(min(x))
+    x_max_default = float(max(x))
+    x_min = st.sidebar.number_input('X min (ns)', value=x_min_default)
+    x_max = st.sidebar.number_input('X max (ns)', value=x_max_default)
+
     plt.figure()
     plt.plot(x, y, label="Data")
     plt.xlabel("Time (ns)")
     plt.ylabel("Counts per bin")
     plt.title(f"Lifetime Measurement ({device})")
+    plt.xlim(x_min, x_max)
     if log_scale:
         plt.yscale('log')
 
@@ -60,16 +68,17 @@ def plot_lifetime(file, device):
         x_pk = np.delete(x_pk, to_delete)
 
         first_peak = x_pk[0]  # in ns
+        peak_height = data_pk[0]  # counts at first peak
 
         # Start and stop in [ns]
         # We will fit between start and stop only. These parameters influence the fit a lot.
         # Start at the first peak + 1 ns, stop at a sensible default based on data range.
-        x_max = float(max(x))
-        default_start = min(first_peak + 1, x_max - 1)
-        default_stop = min(first_peak + 151, x_max)
+        x_data_max = float(max(x))
+        default_start = min(first_peak + 1, x_data_max - 1)
+        default_stop = min(first_peak + 151, x_data_max)
 
-        start = st.sidebar.number_input('Start (in ns)', 0.0, x_max, default_start)
-        stop = st.sidebar.number_input('Stop (in ns)', 0.0, x_max, default_stop)
+        start = st.sidebar.number_input('Start (in ns)', 0.0, x_data_max, default_start)
+        stop = st.sidebar.number_input('Stop (in ns)', 0.0, x_data_max, default_stop)
         # Convert start and stop times (in ns) to indices
         start_idx = np.searchsorted(x, start)
         stop_idx = np.searchsorted(x, stop)
@@ -79,8 +88,6 @@ def plot_lifetime(file, device):
         plt.plot(x_pk, data_pk, 'o', label="Peaks")
         plt.axvline(start, linestyle="--", color="seagreen")
         plt.axvline(stop, linestyle="--", color="firebrick")
-
-        show_fit_results = st.sidebar.checkbox("Show Fit Results", False)
 
         # Parameter name to LaTeX mapping
         param_latex = {
@@ -97,7 +104,7 @@ def plot_lifetime(file, device):
         }
 
         if fit_type == "Single Exponential":
-            y0, N0, t0, tau = [0, first_peak, 0, 10]
+            y0, N0, t0, tau = [np.min(data_fit), peak_height, 0, 10]
             params = [y0, N0, t0, tau]
             param_names = ['y0', 'N0', 't0', 'tau']
             popt, pcov = curve_fit(exp_decay, X_fit, data_fit, p0=params, maxfev=10000)
@@ -117,7 +124,7 @@ def plot_lifetime(file, device):
             """
 
         elif fit_type == "Double Exponential":
-            y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2, = [0, first_peak, 0, 10, first_peak / 2, 0, 10]
+            y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2, = [np.min(data_fit), peak_height, 0, 10, peak_height / 2, 0, 10]
             params = [y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2]
             param_names = ['y0', 'N0_1', 't0_1', 'tau_1', 'N0_2', 't0_2', 'tau_2']
             popt, pcov = curve_fit(double_exp_decay, X_fit, data_fit, p0=params, maxfev=10000)
@@ -141,13 +148,13 @@ def plot_lifetime(file, device):
 
         plt.plot(X_fit + start, Y_fit, 'r--', label=f'{fit_type} Fit')
 
-        if show_fit_results:
-            st.markdown("### Fitting Formula")
-            st.latex(formula)
-            st.markdown("### Fitting Parameters")
-            for name, param, err in zip(param_names, popt, perr):
-                latex_name = param_latex.get(name, name)
-                st.latex(rf"{latex_name} = {param:.3f} \pm {err:.3f}")
+        # Always show fit results
+        st.markdown("### Fitting Formula")
+        st.latex(formula)
+        st.markdown("### Fitting Parameters")
+        for name, param, err in zip(param_names, popt, perr):
+            latex_name = param_latex.get(name, name)
+            st.latex(rf"{latex_name} = {param:.3f} \pm {err:.3f}")
 
     plt.legend()
     plt.grid(True)
