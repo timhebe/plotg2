@@ -18,8 +18,8 @@ def double_exp_decay(x, y0, N0_1, t0_1, tau_1, N0_2, t0_2, tau_2):
 
 
 def plot_lifetime(file, device):
-    log_scale = st.sidebar.radio("Y-axis scale", ("Linear", "Log")) == "Log"
-    fit_type = st.sidebar.selectbox("Fit Type", ["None", "Single Exponential", "Double Exponential"])
+    log_scale = st.sidebar.radio("### Y-axis scale", ("Linear", "Log")) == "Log"
+    fit_type = st.sidebar.selectbox("### Fit Type", ["None", "Single Exponential", "Double Exponential"])
     # show_fit_params = st.sidebar.checkbox("Show Fit Parameters", value=False)
 
     if isinstance(file, str):  # Demo mode
@@ -77,6 +77,7 @@ def plot_lifetime(file, device):
         default_start = min(first_peak + 1, x_data_max - 1)
         default_stop = min(first_peak + 151, x_data_max)
 
+        st.sidebar.markdown("### Fit range")
         start = st.sidebar.number_input('Start (in ns)', 0.0, x_data_max, default_start)
         stop = st.sidebar.number_input('Stop (in ns)', 0.0, x_data_max, default_stop)
         # Convert start and stop times (in ns) to indices
